@@ -1,0 +1,195 @@
+﻿<Window x:Class="PoMo.Client.Shell.ShellView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="clr-namespace:PoMo.Client.Controls"
+    xmlns:system="clr-namespace:System;assembly=mscorlib"
+    xmlns:shell="clr-namespace:PoMo.Client.Shell"
+    Height="600" Width="800" Icon="/Resources/wallet.ico" Title="PoMo"
+    TextOptions.TextFormattingMode="Display" mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance {x:Type shell:ShellViewModel}}"
+    Tag="{Binding Status}">
+    <Window.Style>
+        <Style TargetType="{x:Type Window}">
+            <Style.Resources>
+                <Style TargetType="{x:Type ToolTip}">
+                    <Setter Property="FontFamily" Value="Segoe UI" />
+                    <Setter Property="FontSize" Value="12" />
+                </Style>
+                <Style TargetType="{x:Type StatusBar}">
+                    <Style.Resources>
+                        <Style TargetType="{x:Type StatusBarItem}">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="3"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                        </Style>
+                    </Style.Resources>
+                    <Setter Property="FontFamily" Value="{Binding FontFamily, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+                    <Setter Property="FontSize" Value="{Binding FontSize, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+                    <Setter Property="BorderBrush" Value="CornflowerBlue" />
+                    <Setter Property="Background" Value="#007ACB" />
+                    <Setter Property="Foreground" Value="White" />
+                    <Setter Property="BorderThickness" Value="0,0,1,0" />
+                    <Setter Property="FocusManager.IsFocusScope" Value="True"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type StatusBar}">
+                                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                    <DockPanel>
+                                        <Canvas Width="11" Height="11" DockPanel.Dock="Right" VerticalAlignment="Bottom" IsHitTestVisible="False" Margin="1,1,1,2">
+                                            <Canvas.Style>
+                                                <Style TargetType="{x:Type Canvas}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Value="Maximized">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Canvas.Style>
+                                            <Canvas.Effect>
+                                                <DropShadowEffect BlurRadius="0" ShadowDepth="1" Direction="-420" />
+                                            </Canvas.Effect>
+                                            <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="9" Canvas.Top="0" />
+                                            <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="9" Canvas.Top="3" />
+                                            <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="9" Canvas.Top="6" />
+                                            <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="9" Canvas.Top="9" />
+                                            <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="6" Canvas.Top="3" />
+                                            <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="6" Canvas.Top="6" />
+                                            <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="6" Canvas.Top="9" />
+                                            <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="3" Canvas.Top="6" />
+                                            <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="3" Canvas.Top="9" />
+                                            <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="0" Canvas.Top="9" />
+                                        </Canvas>
+                                        <ItemsPresenter/>
+                                    </DockPanel>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Style.Resources>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=(SystemParameters.IsGlassEnabled)}" Value="True">
+                    <Setter Property="WindowChrome.WindowChrome">
+                        <Setter.Value>
+                            <WindowChrome GlassFrameThickness="-1" UseAeroCaptionButtons="True"  ResizeBorderThickness="6" NonClientFrameEdges="None" />
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True" />
+                </DataTrigger>
+            </Style.Triggers>
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Window}">
+                        <AdornerDecorator>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Border x:Name="classicBorder" Background="{TemplateBinding Background}" Visibility="Collapsed" />
+                                <Border x:Name="contentBorder">
+                                    <ContentPresenter />
+                                </Border>
+                                <StatusBar Grid.Row="1" x:Name="statusBar" DockPanel.Dock="Bottom" IsHitTestVisible="False">
+                                    <StatusBarItem Content="{TemplateBinding Tag}" />
+                                </StatusBar>
+                            </Grid>
+                        </AdornerDecorator>
+                        <ControlTemplate.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding WindowState, RelativeSource={RelativeSource Self}}" Value="Normal" />
+                                    <Condition Binding="{Binding Path=(SystemParameters.IsGlassEnabled)}" Value="True" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Margin" Value="0,8,0,0" TargetName="contentBorder" />
+                            </MultiDataTrigger>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding WindowState, RelativeSource={RelativeSource Self}}" Value="Normal" />
+                                    <Condition Binding="{Binding Path=(SystemParameters.IsGlassEnabled)}" Value="True" />
+                                    <Condition Binding="{Binding Version.Major, Source={x:Static system:Environment.OSVersion}}" Value="6" />
+                                    <Condition Binding="{Binding Version.Minor, Source={x:Static system:Environment.OSVersion}}" Value="1" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Margin" Value="5,8,5,0" TargetName="contentBorder" />
+                                <Setter Property="Margin" Value="5,0,5,5" TargetName="statusBar" />
+                            </MultiDataTrigger>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding WindowState, RelativeSource={RelativeSource Self}}" Value="Maximized" />
+                                    <Condition Binding="{Binding Path=(SystemParameters.IsGlassEnabled)}" Value="True" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Margin" Value="8,8,8,0" TargetName="contentBorder" />
+                                <Setter Property="Margin" Value="8,0,8,8" TargetName="statusBar" />
+                            </MultiDataTrigger>
+                            <DataTrigger Binding="{Binding Path=(SystemParameters.IsGlassEnabled)}" Value="False">
+                                <Setter Property="Visibility" TargetName="classicBorder" Value="Visible" />
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Style>
+    <controls:ApplicationTabControl x:Name="TabControl" controls:TabTearOffBehavior.Handler="{Binding TabTearOffHandler}" 
+        IsLocked="{Binding IsLocked}"
+        CloseTabCommand="{x:Static shell:ShellView.CloseTabCommand}" SelectionChanged="TabControl_SelectionChanged">
+        <controls:ApplicationTabControl.Style>
+            <Style TargetType="{x:Type controls:ApplicationTabControl}">
+                <Style.Triggers>
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding Path=(SystemParameters.IsGlassEnabled)}" Value="True" />
+                            <Condition Binding="{Binding Version.Major, Source={x:Static system:Environment.OSVersion}}" Value="6" />
+                            <Condition Binding="{Binding Version.Minor, Source={x:Static system:Environment.OSVersion}}" Value="1" />
+                        </MultiDataTrigger.Conditions>
+                        <Setter Property="Margin" Value="0" />
+                    </MultiDataTrigger>
+                </Style.Triggers>
+                <Setter Property="Margin" Value="2,0,2,2" />
+            </Style>
+        </controls:ApplicationTabControl.Style>
+        <controls:ApplicationTabControl.Resources>
+            <x:Array Type="system:String" x:Key="Portfolios">
+                <system:String>Portfolio 1</system:String>
+                <system:String>Portfolio 2</system:String>
+                <system:String>Portfolio 3</system:String>
+                <system:String>Portfolio 4</system:String>
+            </x:Array>
+        </controls:ApplicationTabControl.Resources>
+        <controls:ApplicationTabControl.MenuItems>
+            <MenuItem Header="Portfolio" ToolTip="Create a tab to display a Portfolio view" ItemsSource="{Binding Source={StaticResource Portfolios}}">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Resources/new_tab.png" Width="16" Height="16" SnapsToDevicePixels="True" VerticalAlignment="Center" HorizontalAlignment="Center" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                </MenuItem.Icon>
+                <MenuItem.ItemContainerStyle>
+                    <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Setter Property="Header" Value="{Binding}" />
+                        <Setter Property="CommandParameter" Value="{Binding}" />
+                        <Setter Property="Command" Value="{x:Static shell:ShellView.CreatePortfolioViewCommand}" />
+                        <Setter Property="ToolTip" Value="{Binding Header, RelativeSource={RelativeSource Self}}" />
+                    </Style>
+                </MenuItem.ItemContainerStyle>
+            </MenuItem>
+            <MenuItem Header="E_xit" Command="ApplicationCommands.Close" ToolTip="Exit the application">
+                <MenuItem.Style>
+                    <Style TargetType="{x:Type MenuItem}">
+                        <Style.Triggers>
+                            <DataTrigger>
+
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </MenuItem.Style>
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/PoMo.Client;component/Resources/exit.png" Height="16" Width="16" SnapsToDevicePixels="True" 
+                        VerticalAlignment="Center" HorizontalAlignment="Center" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </controls:ApplicationTabControl.MenuItems>
+    </controls:ApplicationTabControl>
+</Window>
