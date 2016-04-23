@@ -7,11 +7,24 @@ namespace PoMo.Client.Shell
 {
     internal sealed class ShellViewTearOffHandler : ITabTearOffHandler
     {
+        public static readonly DependencyProperty IsLockedProperty = DependencyProperty.RegisterAttached("IsLocked", typeof(bool), typeof(ShellViewTearOffHandler),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
         private readonly IFactory<ShellView> _shellViewFactory;
 
         public ShellViewTearOffHandler(IFactory<ShellView> shellViewFactory)
         {
             this._shellViewFactory = shellViewFactory;
+        }
+
+        public static bool GetIsLocked(TabControl tabControl)
+        {
+            return tabControl != null && (bool)tabControl.GetValue(ShellViewTearOffHandler.IsLockedProperty);
+        }
+
+        public static void SetIsLocked(TabControl tabControl, bool isLocked)
+        {
+            tabControl?.SetValue(ShellViewTearOffHandler.IsLockedProperty, isLocked);
         }
 
         bool ITabTearOffHandler.AllowReorder(object item, TabControl tabControl, int sourceIndex, int insertionIndex)
@@ -50,11 +63,11 @@ namespace PoMo.Client.Shell
             sourceTabControl.Items.Remove(item);
             targetTabControl.Items.Insert(insertionIndex, item);
             targetTabControl.SelectedIndex = insertionIndex;
-            ShellView view;
-            if (sourceTabControl.Items.Count != 0 || (view = sourceTabControl.FindVisualTreeAncestor<ShellView>()).Equals(Application.Current.MainWindow))
+            if (sourceTabControl.Items.Count != 0)
             {
                 return;
             }
+            ShellView view = sourceTabControl.FindVisualTreeAncestor<ShellView>();
             view.Close();
             this._shellViewFactory.Release(view);
         }
@@ -84,7 +97,7 @@ namespace PoMo.Client.Shell
 
         bool ITabTearOffHandler.IsDragAllowed(object item, TabControl tabControl, int sourceIndex)
         {
-            return !((ApplicationTabControl)tabControl).IsLocked;
+            return !ShellViewTearOffHandler.GetIsLocked(tabControl);
         }
     }
 }

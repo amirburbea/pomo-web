@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using PoMo.Common.Windsor;
-using TaskDialogInterop;
 
 namespace PoMo.Client.Shell
 {
@@ -15,7 +11,10 @@ namespace PoMo.Client.Shell
         public static readonly RoutedCommand CloseTabCommand = new RoutedCommand(nameof(ShellView.CloseTabCommand), typeof(ShellView));
 
         public static readonly RoutedCommand CreatePortfolioViewCommand = new RoutedCommand(nameof(ShellView.CreatePortfolioViewCommand), typeof(ShellView));
-        
+
+        public static readonly DependencyProperty PreTabContentProperty = DependencyProperty.RegisterAttached("PreTabContent", typeof(object), typeof(ShellView),
+            new PropertyMetadata());
+
         static ShellView()
         {
             CommandManager.RegisterClassCommandBinding(
@@ -59,89 +58,27 @@ namespace PoMo.Client.Shell
             }
         }
 
+        public static object GetPreTabContent(TabControl tabControl)
+        {
+            return tabControl?.GetValue(ShellView.PreTabContentProperty);
+        }
+
+        public static void SetPreTabContent(TabControl tabControl, object preTabContent)
+        {
+            tabControl?.SetValue(ShellView.PreTabContentProperty, preTabContent);
+        }
+
         protected override void OnClosing(CancelEventArgs e)
         {
-            bool isMainWindow = Application.Current.MainWindow.Equals(this);
-            if (isMainWindow)
+            if (Application.Current.MainWindow.Equals(this))
             {
-                List<ShellView> otherWindows = Application.Current.Windows.OfType<ShellView>().Where(view => !view.Equals(this)).ToList();
-                if (otherWindows.Count == 0)
+                ShellView other = Application.Current.Windows.OfType<ShellView>().FirstOrDefault(view => !view.Equals(this));
+                if (other != null)
                 {
-                    this.CloseAllTabs();
-                }
-                else
-                {
-                    TaskDialogResult result = TaskDialog.Show(new TaskDialogOptions
-                    {
-                        Title = this.Title,
-                        MainInstruction = string.Concat(
-                            "Closing the main window will also close all child windows as well (you currently have ",
-                            otherWindows.Count != 1 ? otherWindows.Count + " child windows" : "one child window",
-                            " open)."
-                        ),
-                        MainIcon = VistaTaskDialogIcon.Warning,
-                        AllowDialogCancellation = true,
-                        CommandButtons = new[]
-                        {
-                            "&Proceed\nAll windows will be closed and the application will exit.",
-                            "&Cancel\nThe application will continue running."
-                        }
-                    });
-                    if (!result.CommandButtonResult.HasValue || result.CommandButtonResult.Value == 1)
-                    {
-                        e.Cancel = true;
-                    }
-                    else
-                    {
-                        foreach (ShellView view in otherWindows)
-                        {
-                            view.CloseAllTabs();
-                            view.Close();
-                        }
-                        this.CloseAllTabs();
-                    }
+                    Application.Current.MainWindow = other;
                 }
             }
-            else if (this.TabControl.Items.Count != 0)
-            {
-                string numTabsOpen = this.TabControl.Items.Count != 1 ? this.TabControl.Items.Count + " tabs" : "one tab";
-                TaskDialogResult result = TaskDialog.Show(new TaskDialogOptions
-                {
-                    Title = this.Title,
-                    MainInstruction = string.Concat(
-                        "You have attempted to close a child window with ",
-                        numTabsOpen,
-                        " open.  You must decide on a course of action."
-                    ),
-                    MainIcon = VistaTaskDialogIcon.Warning,
-                    AllowDialogCancellation = true,
-                    CommandButtons = new[]
-                    {
-                        "&Close Tabs\nThe window will close as will its associated tabs.",
-                        "&Move Tabs\nYour tabs will be moved to the main window and this window will close.",
-                        "&Cancel\nNo action will be taken."
-                    }
-                });
-                if (!result.CommandButtonResult.HasValue || result.CommandButtonResult.Value == 2)
-                {
-                    e.Cancel = true;
-                }
-                else if (result.CommandButtonResult.Value == 0)
-                {
-                    this.CloseAllTabs();
-                }
-                else
-                {
-                    ShellView mainWindow = (ShellView)Application.Current.MainWindow;
-                    while (this.TabControl.Items.Count != 0)
-                    {
-                        object item = this.TabControl.Items[0];
-                        this.TabControl.Items.RemoveAt(0);
-                        mainWindow.TabControl.Items.Add(item);
-                    }
-                    mainWindow.TabControl.SelectedIndex = mainWindow.TabControl.Items.Count - 1;
-                }
-            }
+            this.CloseAllTabs();
             base.OnClosing(e);
         }
 
@@ -149,7 +86,7 @@ namespace PoMo.Client.Shell
         {
             ShellView shellView = (ShellView)sender;
             shellView.CloseTab((TabItem)e.Parameter);
-            if (shellView.TabControl.Items.Count == 0 && !shellView.Equals(Application.Current.MainWindow))
+            if (shellView.TabControl.Items.Count == 0)
             {
                 shellView.Close();
             }

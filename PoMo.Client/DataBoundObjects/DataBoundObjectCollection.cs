@@ -20,7 +20,8 @@ namespace PoMo.Client.DataBoundObjects
                 properties[index] = new ColumnPropertyDescriptor(
                     column.ColumnName,
                     index,
-                    !column.AllowDBNull || !column.DataType.IsValueType ? column.DataType : typeof(Nullable<>).MakeGenericType(column.DataType)
+                    !column.AllowDBNull || !column.DataType.IsValueType ? column.DataType : typeof(Nullable<>).MakeGenericType(column.DataType),
+                    string.IsNullOrEmpty(column.Caption) ? column.ColumnName : column.Caption
                 );
             }
             this.Properties = new PropertyDescriptorCollection(properties, true);
@@ -32,6 +33,7 @@ namespace PoMo.Client.DataBoundObjects
                 this.Add(new DataBoundObject(this, values));
                 this._rowIndices.Add(row, this._rowIndices.Count);
             }
+            this.RaisesItemChangedEvents = true;
             this.CustomTypeDescriptor = new DataBoundTypeDescriptor(this.Properties);
             this._dataTable.TableNewRow += this.DataTable_TableNewRow;
             this._dataTable.TableCleared += this.DataTable_TableCleared;
@@ -68,7 +70,7 @@ namespace PoMo.Client.DataBoundObjects
         {
             get;
             set;
-        } = true;
+        }
 
         internal PropertyDescriptorCollection Properties
         {
@@ -182,11 +184,17 @@ namespace PoMo.Client.DataBoundObjects
         {
             private readonly int _ordinal;
 
-            public ColumnPropertyDescriptor(string name, int ordinal, Type propertyType)
+            public ColumnPropertyDescriptor(string name, int ordinal, Type propertyType, string displayName)
                 : base(name, null)
             {
                 this._ordinal = ordinal;
                 this.PropertyType = propertyType;
+                this.Attributes = new AttributeCollection(new DisplayNameAttribute(displayName));
+            }
+
+            public override AttributeCollection Attributes
+            {
+                get;
             }
 
             public override Type ComponentType => typeof(DataBoundObject);
@@ -205,8 +213,7 @@ namespace PoMo.Client.DataBoundObjects
 
             public override object GetValue(object component)
             {
-                DataBoundObject dataBoundObject = (DataBoundObject)component;
-                return dataBoundObject[this._ordinal];
+                return ((DataBoundObject)component).GetValue(this._ordinal);
             }
 
             public override void ResetValue(object component)

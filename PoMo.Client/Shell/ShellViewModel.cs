@@ -5,8 +5,7 @@ namespace PoMo.Client.Shell
     public sealed class ShellViewModel : NotifierBase
     {
         private bool _isLocked;
-
-        private string _status = "Connecting";
+        private ConnectionStatus _connectionStatus;
 
         public ShellViewModel(ITabTearOffHandler tabTearOffHandler)
         {
@@ -25,15 +24,15 @@ namespace PoMo.Client.Shell
             }
         }
 
-        public string Status
+        public ConnectionStatus ConnectionStatus
         {
             get
             {
-                return this._status;
+                return this._connectionStatus;
             }
             private set
             {
-                this.SetValue(ref this._status, value);
+                this.SetValue(ref this._connectionStatus, value);
             }
         }
 

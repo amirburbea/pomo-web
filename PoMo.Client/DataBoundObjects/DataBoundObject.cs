@@ -17,9 +17,15 @@ namespace PoMo.Client.DataBoundObjects
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public object this[int ordinal] => this._values[ordinal];
+        public object GetValue(int ordinal)
+        {
+            return this._values[ordinal];
+        }
 
-        public object this[string columnName] => this._collection.Properties.Find(columnName, false)?.GetValue(this);
+        public object GetValue(string columnName)
+        {
+            return this._collection.Properties.Find(columnName, false)?.GetValue(this);
+        }
 
         internal bool OnPropertyChanged(int ordinal, object value)
         {
@@ -39,10 +45,7 @@ namespace PoMo.Client.DataBoundObjects
 
         private sealed class DataBoundTypeDescriptionProvider : TypeDescriptionProvider
         {
-            public override ICustomTypeDescriptor GetTypeDescriptor(Type objectType, object instance)
-            {
-                return ((DataBoundObject)instance)._collection.CustomTypeDescriptor;
-            }
+            public override ICustomTypeDescriptor GetTypeDescriptor(Type objectType, object instance) => ((DataBoundObject)instance)._collection.CustomTypeDescriptor;
         }
     }
 }

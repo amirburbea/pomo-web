@@ -1,0 +1,55 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Style TargetType="{x:Type StatusBar}">
+        <Style.Resources>
+            <Style TargetType="{x:Type StatusBarItem}">
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="3"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+            </Style>
+        </Style.Resources>
+        <Setter Property="FontFamily" Value="{Binding FontFamily, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+        <Setter Property="FontSize" Value="{Binding FontSize, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+        <Setter Property="BorderBrush" Value="CornflowerBlue" />
+        <Setter Property="Background" Value="#007ACB" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+        <Setter Property="IsHitTestVisible" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type StatusBar}">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                        <DockPanel>
+                            <Canvas Width="11" Height="11" DockPanel.Dock="Right" VerticalAlignment="Bottom" IsHitTestVisible="False" Margin="1,1,1,2">
+                                <Canvas.Style>
+                                    <Style TargetType="{x:Type Canvas}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Value="Maximized">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Canvas.Style>
+                                <Canvas.Effect>
+                                    <DropShadowEffect BlurRadius="0" ShadowDepth="1" Direction="-420" />
+                                </Canvas.Effect>
+                                <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="9" Canvas.Top="0" />
+                                <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="9" Canvas.Top="3" />
+                                <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="9" Canvas.Top="6" />
+                                <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="9" Canvas.Top="9" />
+                                <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="6" Canvas.Top="3" />
+                                <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="6" Canvas.Top="6" />
+                                <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="6" Canvas.Top="9" />
+                                <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="3" Canvas.Top="6" />
+                                <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="3" Canvas.Top="9" />
+                                <Ellipse Width="2" Height="2" Fill="#AFFFFFFF" Canvas.Left="0" Canvas.Top="9" />
+                            </Canvas>
+                            <ItemsPresenter/>
+                        </DockPanel>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>
