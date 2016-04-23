@@ -13,23 +13,19 @@ namespace PoMo.Client.Shell
     {
         public static readonly RoutedCommand CloseTabCommand = new RoutedCommand(nameof(ShellView.CloseTabCommand), typeof(ShellView));
 
-        public static readonly RoutedCommand CreatePortfolioViewCommand = new RoutedCommand(nameof(ShellView.CreatePortfolioViewCommand), typeof(ShellView));
-
-        public static readonly DependencyProperty PreTabContentProperty = DependencyProperty.RegisterAttached("PreTabContent", typeof(object), typeof(ShellView),
-            new PropertyMetadata());
+        public static readonly RoutedCommand CreateViewCommand = new RoutedCommand(nameof(ShellView.CreateViewCommand), typeof(ShellView));
 
         private int _ignoreSelectionChangedCounter;
 
         static ShellView()
         {
-            CommandManager.RegisterClassCommandBinding(typeof(ShellView), new CommandBinding(ApplicationCommands.Close, (sender, e) => ((Window)sender).Close()));
-            CommandManager.RegisterClassCommandBinding(typeof(ShellView), new CommandBinding(ShellView.CreatePortfolioViewCommand, (sender, e) => ((ShellView)sender).CreateTab(e.Parameter), (sender, e) => e.CanExecute = !ShellView.IsTabOpen(e.Parameter)));
+            CommandManager.RegisterClassCommandBinding(typeof(ShellView), new CommandBinding(ApplicationCommands.Close, ShellView.CloseCommand_Executed));
+            CommandManager.RegisterClassCommandBinding(typeof(ShellView), new CommandBinding(ShellView.CreateViewCommand, ShellView.CreateViewCommand_Executed, ShellView.CreateViewCommand_CanExecute));
             CommandManager.RegisterClassCommandBinding(typeof(ShellView), new CommandBinding(ShellView.CloseTabCommand, ShellView.CloseTabCommand_Executed));
         }
 
-        public ShellView(ITabTearOffHandler tabTearOffHandler)
+        public ShellView()
         {
-            this.TabTearOffHandler = tabTearOffHandler;
             this.InitializeComponent();
         }
 
@@ -48,16 +44,7 @@ namespace PoMo.Client.Shell
         public ITabTearOffHandler TabTearOffHandler
         {
             get;
-        }
-
-        public static object GetPreTabContent(TabControl tabControl)
-        {
-            return tabControl?.GetValue(ShellView.PreTabContentProperty);
-        }
-
-        public static void SetPreTabContent(TabControl tabControl, object preTabContent)
-        {
-            tabControl?.SetValue(ShellView.PreTabContentProperty, preTabContent);
+            set;
         }
 
         internal IDisposable CreateIgnoreSelectionChangedScope()
@@ -79,6 +66,11 @@ namespace PoMo.Client.Shell
             base.OnClosing(e);
         }
 
+        private static void CloseCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            ((Window)sender).Close();
+        }
+
         private static void CloseTabCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             ShellView shellView = (ShellView)sender;
@@ -88,6 +80,16 @@ namespace PoMo.Client.Shell
             {
                 shellView.Close();
             }
+        }
+
+        private static void CreateViewCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = !ShellView.IsTabOpen(e.Parameter);
+        }
+
+        private static void CreateViewCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            ((ShellView)sender).CreateTab(e.Parameter);
         }
 
         private static bool IsTabOpen(object portfolio)
