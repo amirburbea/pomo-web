@@ -3,11 +3,97 @@
     xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
     xmlns:system="clr-namespace:System;assembly=mscorlib"
     xmlns:themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero">
+    <Geometry x:Key="RightArrow">M 0,0 L 4,3.5 L 0,7 Z</Geometry>
+    <Geometry x:Key="Checkmark">M 0,5.1 L 1.7,5.2 L 3.4,7.1 L 8,0.4 L 9.2,0 L 3.3,10.8 Z</Geometry>
+    <SolidColorBrush x:Key="SubMenuBackgroundBrush" Color="#FFF5F5F5" po:Freeze="true" />
+    <LinearGradientBrush x:Key="MenuItemSelectionFill" po:Freeze="true" StartPoint="0,0" EndPoint="0,1">
+        <LinearGradientBrush.GradientStops>
+            <GradientStop Color="#34C5EBFF" Offset="0"/>
+            <GradientStop Color="#3481D8FF" Offset="1"/>
+        </LinearGradientBrush.GradientStops>
+    </LinearGradientBrush>
     <Style TargetType="{x:Type MenuItem}">
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="FontFamily" Value="{Binding FontFamily, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
         <Setter Property="FontSize" Value="{Binding FontSize, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type MenuItem}">
+                    <Grid SnapsToDevicePixels="true" TextBlock.FontFamily="{Binding FontFamily, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+			            TextBlock.FontSize="{Binding FontSize, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+                        <Rectangle Name="Bg" Fill="{TemplateBinding MenuItem.Background}" Stroke="{TemplateBinding MenuItem.BorderBrush}" StrokeThickness="1" RadiusX="2" RadiusY="2"/>
+                        <Rectangle x:Name="InnerBorder" Margin="1" Stroke="Transparent" StrokeThickness="1" RadiusX="2" RadiusY="2"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition MinWidth="24" Width="Auto" SharedSizeGroup="MenuItemIconColumnGroup"/>
+                                <ColumnDefinition Width="4"/>
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="37"/>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="MenuItemIGTColumnGroup"/>
+                                <ColumnDefinition Width="17"/>
+                            </Grid.ColumnDefinitions>
+                            <ContentPresenter x:Name="Icon" Margin="1" VerticalAlignment="Center" ContentSource="Icon" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            <Border x:Name="GlyphPanel" Background="#E6EFF4" BorderBrush="#CDD3E6" BorderThickness="1" CornerRadius="3" Margin="1" Visibility="Hidden" Width="22" Height="22">
+                                <Path Name="Glyph" Width="9" Height="11" Fill="#0C12A1" FlowDirection="LeftToRight" Data="{StaticResource Checkmark}"/>
+                            </Border>
+                            <ContentPresenter Grid.Column="2" ContentSource="Header" Margin="{TemplateBinding MenuItem.Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="4" Text="{TemplateBinding MenuItem.InputGestureText}" Margin="{TemplateBinding MenuItem.Padding}" Visibility="Collapsed"/>
+                            <Path x:Name="RightArrow" Grid.Column="5" VerticalAlignment="Center" Margin="4,0,0,0" Fill="{TemplateBinding MenuItem.Foreground}" Data="{StaticResource RightArrow}"/>
+                        </Grid>
+                        <Popup x:Name="PART_Popup" AllowsTransparency="true" Placement="Right" VerticalOffset="-3" HorizontalOffset="-2" IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                            Focusable="false" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
+                            <themes:SystemDropShadowChrome Name="Shdw" Color="Transparent">
+                                <ContentControl Name="SubMenuBorder" Template="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type FrameworkElement}, ResourceId=SubmenuContent}}" IsTabStop="false">
+                                    <ScrollViewer Name="SubMenuScrollViewer" CanContentScroll="true" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type FrameworkElement}, ResourceId=MenuScrollViewer}}" MaxHeight="275">
+                                        <Grid RenderOptions.ClearTypeHint="Enabled">
+                                            <Canvas Height="0" Width="0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                                <Rectangle Height="{Binding ActualHeight, ElementName=SubMenuBorder}" Width="{Binding ActualWidth, ElementName=SubMenuBorder}" Fill="{StaticResource SubMenuBackgroundBrush}" />
+                                            </Canvas>
+                                            <ItemsPresenter Name="ItemsPresenter" Margin="2" KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.DirectionalNavigation="Cycle" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" Grid.IsSharedSizeScope="true"/>
+                                        </Grid>
+                                    </ScrollViewer>
+                                </ContentControl>
+                            </themes:SystemDropShadowChrome>
+                        </Popup>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="HasItems" Value="false">
+                            <Setter TargetName="RightArrow" Property="Visibility" Value="Hidden" />
+                        </Trigger>
+                        <Trigger Property="IsSuspendingPopupAnimation" Value="true">
+                            <Setter TargetName="PART_Popup" Property="PopupAnimation" Value="None"/>
+                        </Trigger>
+                        <Trigger Property="IsHighlighted" Value="true">
+                            <Setter TargetName="InnerBorder" Property="Stroke" Value="#D1DBF4FF"/>
+                        </Trigger>
+                        <Trigger Property="Icon" Value="{x:Null}">
+                            <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="true">
+                            <Setter TargetName="GlyphPanel" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger SourceName="PART_Popup" Property="Popup.HasDropShadow" Value="true">
+                            <Setter TargetName="Shdw" Property="Margin" Value="0,0,5,5"/>
+                            <Setter TargetName="Shdw" Property="Color" Value="#71000000"/>
+                        </Trigger>
+                        <Trigger Property="IsHighlighted" Value="true">
+                            <Setter TargetName="Bg" Property="Fill" Value="{StaticResource MenuItemSelectionFill}"/>
+                            <Setter TargetName="Bg" Property="Stroke" Value="#8571CBF1"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Foreground" Value="#FF9A9A9A"/>
+                            <Setter TargetName="GlyphPanel" Property="Background" Value="#EEE9E9"/>
+                            <Setter TargetName="GlyphPanel" Property="BorderBrush" Value="#DBD6D6"/>
+                            <Setter TargetName="Glyph" Property="Fill" Value="#848589"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
+    
     <Style TargetType="{x:Type MenuItem}" x:Key="ApplicationMenuStyle">
         <Setter Property="VerticalContentAlignment" Value="Stretch" />
         <Setter Property="Margin" Value="0" />
@@ -23,7 +109,7 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
                         <Border CornerRadius="0,0,4,4" Grid.RowSpan="2" Background="{TemplateBinding Background}" x:Name="BD"
-							        BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+						    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
                             <Border CornerRadius="0,0,4,4">
                                 <Border.Background >
                                     <LinearGradientBrush EndPoint="0.494,0.889" StartPoint="0.494,0.028" po:Freeze="True">
@@ -56,13 +142,13 @@
                             <DockPanel.RenderTransform>
                                 <ScaleTransform ScaleX="{Binding Tag, ElementName=DP}" ScaleY="{Binding Tag, ElementName=DP}" />
                             </DockPanel.RenderTransform>
-                            <Image x:Name="Icon" Height="22" Width="22" Source="{Binding MainWindow.Icon, Source={x:Static Application.Current}}" 
-					                    SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" DockPanel.Dock="Left" Margin="4,0"/>
+                            <Image x:Name="Icon" Height="22" Width="22" Source="{Binding MainWindow.Icon, Source={x:Static Application.Current}}" VerticalAlignment="Center"
+					            SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" DockPanel.Dock="Left" Margin="4,0"/>
                             <Path x:Name="arrow" DockPanel.Dock="Right" Data="M 0,0 L 3.5,4 L 7,0 Z" Fill="White" Margin="5,0" VerticalAlignment="Center"/>
                             <ContentPresenter ContentSource="Header" VerticalAlignment="Center" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" TextBlock.Foreground="White" TextBlock.FontWeight="Bold" />
                         </DockPanel>
                         <Border x:Name="pressedBorder" BorderBrush="{Binding Path=(SystemColors.ControlDarkDarkBrush)}" BorderThickness="1" 
-							        Visibility="Collapsed" Grid.RowSpan="2">
+						    Visibility="Collapsed" Grid.RowSpan="2">
                             <Border.Background>
                                 <RadialGradientBrush RadiusY="0.604" RadiusX="0.604" po:Freeze="True">
                                     <GradientStop Color="#4C000000" Offset="1"/>
@@ -71,8 +157,8 @@
                             </Border.Background>
                         </Border>
                         <Popup x:Name="PART_Popup" UseLayoutRounding="True" AllowsTransparency="True" Focusable="False" 
-							        IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
-                                    PopupAnimation="Fade" VerticalOffset="0" Grid.RowSpan="2" Placement="Bottom">
+							IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                            PopupAnimation="Fade" VerticalOffset="0" Grid.RowSpan="2" Placement="Bottom">
                             <themes:SystemDropShadowChrome Name="Shdw">
                                 <Border BorderThickness="1" BorderBrush="Gray" SnapsToDevicePixels="True">
                                     <DockPanel>

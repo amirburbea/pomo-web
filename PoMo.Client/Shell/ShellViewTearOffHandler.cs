@@ -50,7 +50,7 @@ namespace PoMo.Client.Shell
                 return;
             }
             ShellView shellView = tabControl.FindVisualTreeAncestor<ShellView>();
-            //using (shellView.CreateIgnoreSelectionChangedScope())
+            using (shellView.CreateIgnoreSelectionChangedScope())
             {
                 tabControl.Items.RemoveAt(sourceIndex);
                 tabControl.Items.Insert(tabIndex, item);
@@ -60,7 +60,7 @@ namespace PoMo.Client.Shell
 
         void ITabTearOffHandler.HandleTargetedDrop(object item, TabControl sourceTabControl, int sourceIndex, TabControl targetTabControl, int insertionIndex)
         {
-            sourceTabControl.Items.Remove(item);
+            sourceTabControl.Items.RemoveAt(sourceIndex);
             targetTabControl.Items.Insert(insertionIndex, item);
             targetTabControl.SelectedIndex = insertionIndex;
             if (sourceTabControl.Items.Count != 0)
@@ -75,23 +75,24 @@ namespace PoMo.Client.Shell
         void ITabTearOffHandler.HandleTargetlessDrop(object item, TabControl sourceTabControl, int sourceIndex, Point dropLocation)
         {
             ShellView shellView = sourceTabControl.FindVisualTreeAncestor<ShellView>();
-            if (sourceTabControl.Items.Count == 1)
+            if (sourceTabControl.Items.Count != 1)
+            {
+                // Create a new ShellView to hold the tab.
+                ShellView view = this._shellViewFactory.Resolve();
+                view.Left = dropLocation.X;
+                view.Top = dropLocation.Y;
+                view.Height = shellView.WindowState == WindowState.Normal ? shellView.ActualHeight : shellView.RestoreBounds.Height;
+                view.Width = shellView.WindowState == WindowState.Normal ? shellView.ActualWidth : shellView.RestoreBounds.Width;
+                sourceTabControl.Items.RemoveAt(sourceIndex);
+                view.Show();
+                view.Activate();
+                view.TabControl.SelectedIndex = view.TabControl.Items.Add(item);
+            }
+            else
             {
                 shellView.Left = dropLocation.X;
                 shellView.Top = dropLocation.Y;
                 shellView.Activate();
-            }
-            else
-            {
-                ShellView spawnView = this._shellViewFactory.Resolve();
-                spawnView.Left = dropLocation.X;
-                spawnView.Top = dropLocation.Y;
-                spawnView.Height = shellView.WindowState == WindowState.Normal ? shellView.ActualHeight : shellView.RestoreBounds.Height;
-                spawnView.Width = shellView.WindowState == WindowState.Normal ? shellView.ActualWidth : shellView.RestoreBounds.Width;
-                sourceTabControl.Items.Remove(item);
-                spawnView.Show();
-                spawnView.Activate();
-                spawnView.TabControl.SelectedIndex = spawnView.TabControl.Items.Add(item);
             }
         }
 

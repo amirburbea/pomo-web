@@ -78,7 +78,6 @@
     <Compile Include="Controls\NotifierBase.cs" />
     <Compile Include="Shell\ShellViewTearOffHandler.cs" />
     <Compile Include="Controls\TabTearOffBehavior.cs" />
-    <Compile Include="Controls\ValueEqualityConverter.cs" />
     <Compile Include="Controls\VisualTreeMethods.cs" />
     <Compile Include="Controls\WindsorInstaller.cs" />
     <Compile Include="Program.cs" />
@@ -102,15 +101,15 @@
       <DependentUpon>ShellView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Controls\WindowResources.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Shell\StatusBarResources.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Shell\TabControlResources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Shell\WindowResources.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -152,7 +151,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\exit.png" />
+    <Resource Include="Resources\close.png" />
     <Resource Include="Resources\lock.png" />
     <Resource Include="Resources\new_tab.png" />
     <Resource Include="Resources\unlock.png" />

@@ -1,8 +1,11 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using PoMo.Client.Controls;
 
 namespace PoMo.Client.Shell
 {
@@ -15,34 +18,18 @@ namespace PoMo.Client.Shell
         public static readonly DependencyProperty PreTabContentProperty = DependencyProperty.RegisterAttached("PreTabContent", typeof(object), typeof(ShellView),
             new PropertyMetadata());
 
+        private int _ignoreSelectionChangedCounter;
+
         static ShellView()
         {
-            CommandManager.RegisterClassCommandBinding(
-                typeof(ShellView),
-                new CommandBinding(
-                    ApplicationCommands.Close,
-                    (sender, e) => ((Window)sender).Close()
-                )
-            );
-            CommandManager.RegisterClassCommandBinding(
-                typeof(ShellView),
-                new CommandBinding(
-                    ShellView.CreatePortfolioViewCommand,
-                    (sender, e) => ((ShellView)sender).CreateTab(e.Parameter),
-                    (sender, e) => e.CanExecute = !ShellView.IsTabOpen(e.Parameter)
-                )
-            );
-            CommandManager.RegisterClassCommandBinding(
-                typeof(ShellView),
-                new CommandBinding(
-                    ShellView.CloseTabCommand,
-                    ShellView.CloseTabCommand_Executed
-                )
-            );
+            CommandManager.RegisterClassCommandBinding(typeof(ShellView), new CommandBinding(ApplicationCommands.Close, (sender, e) => ((Window)sender).Close()));
+            CommandManager.RegisterClassCommandBinding(typeof(ShellView), new CommandBinding(ShellView.CreatePortfolioViewCommand, (sender, e) => ((ShellView)sender).CreateTab(e.Parameter), (sender, e) => e.CanExecute = !ShellView.IsTabOpen(e.Parameter)));
+            CommandManager.RegisterClassCommandBinding(typeof(ShellView), new CommandBinding(ShellView.CloseTabCommand, ShellView.CloseTabCommand_Executed));
         }
 
-        public ShellView()
+        public ShellView(ITabTearOffHandler tabTearOffHandler)
         {
+            this.TabTearOffHandler = tabTearOffHandler;
             this.InitializeComponent();
         }
 
@@ -58,6 +45,11 @@ namespace PoMo.Client.Shell
             }
         }
 
+        public ITabTearOffHandler TabTearOffHandler
+        {
+            get;
+        }
+
         public static object GetPreTabContent(TabControl tabControl)
         {
             return tabControl?.GetValue(ShellView.PreTabContentProperty);
@@ -66,6 +58,11 @@ namespace PoMo.Client.Shell
         public static void SetPreTabContent(TabControl tabControl, object preTabContent)
         {
             tabControl?.SetValue(ShellView.PreTabContentProperty, preTabContent);
+        }
+
+        internal IDisposable CreateIgnoreSelectionChangedScope()
+        {
+            return new IgnoreSelectionChangedScope(this);
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -85,7 +82,8 @@ namespace PoMo.Client.Shell
         private static void CloseTabCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             ShellView shellView = (ShellView)sender;
-            shellView.CloseTab((TabItem)e.Parameter);
+            TabItem tabItem = (TabItem)e.Parameter;
+            shellView.CloseTab(tabItem, shellView.TabControl.ItemContainerGenerator.IndexFromContainer(tabItem));
             if (shellView.TabControl.Items.Count == 0)
             {
                 shellView.Close();
@@ -101,13 +99,13 @@ namespace PoMo.Client.Shell
         {
             for (int index = this.TabControl.Items.Count - 1; index != -1; index--)
             {
-                this.CloseTab((TabItem)this.TabControl.Items[index]);
+                this.CloseTab((TabItem)this.TabControl.Items[index], index);
             }
         }
 
-        private void CloseTab(TabItem item)
+        private void CloseTab(TabItem item, int index)
         {
-            this.TabControl.Items.Remove(item);
+            this.TabControl.Items.RemoveAt(index);
         }
 
         private void CreateTab(object parameter)
@@ -125,6 +123,32 @@ namespace PoMo.Client.Shell
 
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (this._ignoreSelectionChangedCounter != 0)
+            {
+                return;
+            }
+        }
+
+        private sealed class IgnoreSelectionChangedScope : IDisposable
+        {
+            private readonly ShellView _shellView;
+            private bool _isDisposed;
+
+            public IgnoreSelectionChangedScope(ShellView shellView)
+            {
+                this._shellView = shellView;
+                Interlocked.Increment(ref this._shellView._ignoreSelectionChangedCounter);
+            }
+
+            public void Dispose()
+            {
+                if (this._isDisposed)
+                {
+                    return;
+                }
+                Interlocked.Decrement(ref this._shellView._ignoreSelectionChangedCounter);
+                this._isDisposed = true;
+            }
         }
     }
 }

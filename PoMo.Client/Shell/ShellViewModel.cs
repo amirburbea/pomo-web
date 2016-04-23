@@ -7,11 +7,6 @@ namespace PoMo.Client.Shell
         private bool _isLocked;
         private ConnectionStatus _connectionStatus;
 
-        public ShellViewModel(ITabTearOffHandler tabTearOffHandler)
-        {
-            this.TabTearOffHandler = tabTearOffHandler;
-        }
-
         public bool IsLocked
         {
             get
@@ -34,11 +29,6 @@ namespace PoMo.Client.Shell
             {
                 this.SetValue(ref this._connectionStatus, value);
             }
-        }
-
-        public ITabTearOffHandler TabTearOffHandler
-        {
-            get;
         }
     }
 }
