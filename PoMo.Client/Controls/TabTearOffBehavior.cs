@@ -21,6 +21,7 @@ namespace PoMo.Client.Controls
         private static readonly List<Window> _windows;
         private static readonly DependencyProperty _zIndexProperty = DependencyProperty.RegisterAttached("ZIndex", typeof(int), typeof(TabTearOffBehavior));
 
+        private static TabItem _activeTabItem;
         private static InsertionAdorner _adorner;
         private static Point _dragStartPosition;
         private static Window _dragWindow;
@@ -32,12 +33,6 @@ namespace PoMo.Client.Controls
             TabTearOffBehavior._isDraggingOverPropertyKey = DependencyProperty.RegisterAttachedReadOnly("IsDraggingOver", typeof(bool), typeof(TabTearOffBehavior), new PropertyMetadata(null));
             TabTearOffBehavior.IsDraggingOverProperty = TabTearOffBehavior._isDraggingOverPropertyKey.DependencyProperty;
             TabTearOffBehavior.HandlerProperty = DependencyProperty.RegisterAttached("Handler", typeof(ITabTearOffHandler), typeof(TabTearOffBehavior), new PropertyMetadata(TabTearOffBehavior.HandlerProperty_PropertyChanged));
-        }
-
-        internal static TabItem ActiveTabItem
-        {
-            get;
-            private set;
         }
 
         public static ITabTearOffHandler GetHandler(TabControl tabControl)
@@ -126,9 +121,9 @@ namespace PoMo.Client.Controls
             return null;
         }
 
-        private static Visual GetContentVisual(Control tabControl)
+        private static object GetContent(Control tabControl)
         {
-            return (Visual)tabControl.Template.FindName("ContentPanel", tabControl) ?? (Visual)tabControl.Template.FindName("PART_SelectedContentHost", tabControl);
+            return tabControl.Template.FindName("ContentPanel", tabControl) ?? tabControl.Template.FindName("PART_SelectedContentHost", tabControl);
         }
 
         private static bool GetMaintainZIndex(Window window)
@@ -272,7 +267,7 @@ namespace PoMo.Client.Controls
                 TabTearOffBehavior._dragWindow = null;
             }
             TabTearOffBehavior._dragStartPosition = default(Point);
-            TabTearOffBehavior.ActiveTabItem = null;
+            TabTearOffBehavior._activeTabItem = null;
             e.Handled = true;
         }
 
@@ -284,7 +279,7 @@ namespace PoMo.Client.Controls
         private static void TabControl_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             TabControl tabControl = (TabControl)sender;
-            TabTearOffBehavior.ActiveTabItem = null;
+            TabTearOffBehavior._activeTabItem = null;
             TabTearOffBehavior._dragStartPosition = default(Point);
             Point position = e.GetPosition(tabControl);
             HitTestResult result = VisualTreeHelper.HitTest(tabControl, position);
@@ -311,7 +306,7 @@ namespace PoMo.Client.Controls
             {
                 return;
             }
-            TabTearOffBehavior.ActiveTabItem = tabItem;
+            TabTearOffBehavior._activeTabItem = tabItem;
             TabTearOffBehavior._dragStartPosition = position;
             tabControl.PreviewMouseMove += TabTearOffBehavior.TabControl_PreviewMouseMove;
             tabControl.PreviewMouseLeftButtonUp += TabTearOffBehavior.TabControl_PreviewMouseLeftButtonUp;
@@ -328,7 +323,7 @@ namespace PoMo.Client.Controls
             sourceTabControl.LostMouseCapture -= TabTearOffBehavior.TabControl_MouseLeaveOrLostCapture;
             if (sourceTabControl.IsMouseCaptured)
             {
-                TabItem tabItem = TabTearOffBehavior.ActiveTabItem;
+                TabItem tabItem = TabTearOffBehavior._activeTabItem;
                 Point dragWindowLocation = new Point
                 {
                     X = TabTearOffBehavior._dragWindow.Left,
@@ -342,7 +337,7 @@ namespace PoMo.Client.Controls
                 }
                 TabTearOffBehavior._dragWindow.Close();
                 TabTearOffBehavior._dragWindow = null;
-                TabTearOffBehavior.ActiveTabItem = null;
+                TabTearOffBehavior._activeTabItem = null;
                 object item = sourceTabControl.ItemContainerGenerator.ItemFromContainer(tabItem);
                 int sourceIndex = sourceTabControl.ItemContainerGenerator.IndexFromContainer(tabItem);
                 Window dropWindow = TabTearOffBehavior.GetWindowMouseIsOver(e);
@@ -387,63 +382,78 @@ namespace PoMo.Client.Controls
             {
                 TabTearOffBehavior.UpdateDragWindowLocation(tabControl);
                 Window dropWindow = TabTearOffBehavior.GetWindowMouseIsOver(e);
-                if (dropWindow != null)
+                if (dropWindow == null)
                 {
-                    if (!dropWindow.IsActive)
+                    return;
+                }
+                if (!dropWindow.IsActive)
+                {
+                    dropWindow.Activate();
+                }
+                ITabTearOffHandler targetHandler;
+                TabControl targetTabControl = TabTearOffBehavior.FindTargetTabControl(dropWindow, out targetHandler);
+                Panel panel = ControlMethods.GetPanel(targetTabControl);
+                if (TabTearOffBehavior.IsMouseInDropLocation(e, targetTabControl, panel))
+                {
+                    if (TabTearOffBehavior._adorner == null || !Object.ReferenceEquals(TabTearOffBehavior._adorner.AdornedElement, targetTabControl))
                     {
-                        dropWindow.Activate();
-                    }
-                    ITabTearOffHandler targetHandler;
-                    TabControl targetTabControl = TabTearOffBehavior.FindTargetTabControl(dropWindow, out targetHandler);
-                    Panel panel = ControlMethods.GetPanel(targetTabControl);
-                    if (TabTearOffBehavior.IsMouseInDropLocation(e, targetTabControl, panel))
-                    {
-                        if (TabTearOffBehavior._adorner == null || !Object.ReferenceEquals(TabTearOffBehavior._adorner.AdornedElement, targetTabControl))
+                        if (TabTearOffBehavior._adorner != null)
                         {
-                            if (TabTearOffBehavior._adorner != null)
-                            {
-                                TabTearOffBehavior._adorner.Detach();
-                            }
-                            TabTearOffBehavior._adorner = new InsertionAdorner(targetTabControl, panel.GetOrientation());
+                            TabTearOffBehavior._adorner.Detach();
                         }
-                        TabTearOffBehavior._adorner.UpdateLocation(e);
+                        TabTearOffBehavior._adorner = new InsertionAdorner(targetTabControl, panel.GetOrientation());
                     }
-                    else if (TabTearOffBehavior._adorner != null)
-                    {
-                        TabTearOffBehavior._adorner.Detach();
-                        TabTearOffBehavior._adorner = null;
-                    }
+                    TabTearOffBehavior._adorner.UpdateLocation(e);
+                }
+                else if (TabTearOffBehavior._adorner != null)
+                {
+                    TabTearOffBehavior._adorner.Detach();
+                    TabTearOffBehavior._adorner = null;
                 }
             }
             else if (TabTearOffBehavior.IsSufficientDragMove(point))
             {
-                StackPanel stackPanel = new StackPanel();
-                if (tabControl.TabStripPlacement == Dock.Left || tabControl.TabStripPlacement == Dock.Right)
+                Rectangle contentRectangle = TabTearOffBehavior.CreateRectangle((Visual)TabTearOffBehavior.GetContent(tabControl));
+                Rectangle tabItemRectangle = TabTearOffBehavior.CreateRectangle(TabTearOffBehavior._activeTabItem);
+                StackPanel stackPanel;
+                if (tabControl.TabStripPlacement == Dock.Right || tabControl.TabStripPlacement == Dock.Bottom)
                 {
-                    stackPanel.Orientation = Orientation.Horizontal;
-                }
-                switch (tabControl.TabStripPlacement)
-                {
-                    case Dock.Right:
-                    case Dock.Bottom:
-                        stackPanel.Children.Add(TabTearOffBehavior.CreateRectangle(TabTearOffBehavior.GetContentVisual(tabControl)));
-                        stackPanel.Children.Add(TabTearOffBehavior.CreateRectangle(TabTearOffBehavior.ActiveTabItem));
-                        break;
-                    default:
-                        stackPanel.Children.Add(TabTearOffBehavior.CreateRectangle(TabTearOffBehavior.ActiveTabItem));
-                        stackPanel.Children.Add(TabTearOffBehavior.CreateRectangle(TabTearOffBehavior.GetContentVisual(tabControl)));
-                        break;
-                }
-                TabTearOffBehavior._dragWindow = new DragWindow(new Border
-                {
-                    Child = stackPanel,
-                    Opacity = 0.6,
-                    RenderTransform = new ScaleTransform
+                    stackPanel = new StackPanel
                     {
-                        ScaleX = 0.8,
-                        ScaleY = 0.8
+                        Orientation = tabControl.TabStripPlacement == Dock.Right ? Orientation.Horizontal : Orientation.Vertical,
+                        Children =
+                        {
+                            contentRectangle,
+                            tabItemRectangle
+                        }
+                    };
+                }
+                else
+                {
+                    stackPanel = new StackPanel
+                    {
+                        Orientation = tabControl.TabStripPlacement == Dock.Left ? Orientation.Horizontal : Orientation.Vertical,
+                        Children =
+                        {
+                            tabItemRectangle,
+                            contentRectangle
+                        }
+                    };
+                }
+                TabTearOffBehavior._dragWindow = new Window
+                {
+                    Topmost = true,
+                    AllowsTransparency = true,
+                    WindowStyle = WindowStyle.None,
+                    IsHitTestVisible = false,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    Background = Brushes.Transparent,
+                    Content = new Border
+                    {
+                        Child = stackPanel,
+                        Opacity = 0.75
                     }
-                });
+                };
                 TabTearOffBehavior.UpdateDragWindowLocation(tabControl);
                 TabTearOffBehavior._dragWindow.Show();
                 tabControl.MouseLeave -= TabTearOffBehavior.TabControl_MouseLeaveOrLostCapture;
@@ -454,7 +464,7 @@ namespace PoMo.Client.Controls
 
         private static void UpdateDragWindowLocation(DependencyObject tabControl)
         {
-            Window window = tabControl.FindVisualTreeAncestor<Window>();
+            Window window = Window.GetWindow(tabControl);
             Point? targetPoint = PresentationSource.FromVisual(window)?.CompositionTarget?.TransformFromDevice.Transform(window.PointToScreen(new Point(0, 0)));
             if (!targetPoint.HasValue)
             {
@@ -481,39 +491,6 @@ namespace PoMo.Client.Controls
         private static void Window_Closed(object sender, EventArgs e)
         {
             TabTearOffBehavior.SetMaintainZIndex((Window)sender, false);
-        }
-
-        private sealed class DragWindow : Window
-        {
-            private readonly UIElement _element;
-
-            public DragWindow(UIElement element)
-            {
-                this._element = element;
-                this.Topmost = true;
-                this.AllowsTransparency = true;
-                this.WindowStyle = WindowStyle.None;
-                this.IsHitTestVisible = false;
-            }
-
-            protected override int VisualChildrenCount => 1;
-
-            protected override Size ArrangeOverride(Size finalSize)
-            {
-                this._element.Arrange(new Rect(finalSize));
-                return finalSize;
-            }
-
-            protected override Visual GetVisualChild(int index)
-            {
-                return this._element;
-            }
-
-            protected override Size MeasureOverride(Size constraint)
-            {
-                this._element.Measure(constraint);
-                return this._element.DesiredSize;
-            }
         }
 
         private sealed class InsertionAdorner : Adorner
@@ -573,10 +550,10 @@ namespace PoMo.Client.Controls
             {
                 int insertionIndex = TabTearOffBehavior.DetermineInsertionIndex(this.AdornedElement, this._mouseEventArgs, this._orientation);
                 ITabTearOffHandler handler = TabTearOffBehavior.GetHandler(this.AdornedElement);
-                TabControl activeTabControl = TabTearOffBehavior.ActiveTabItem == null ? null : (TabControl)ItemsControl.ItemsControlFromItemContainer(TabTearOffBehavior.ActiveTabItem);
+                TabControl activeTabControl = TabTearOffBehavior._activeTabItem == null ? null : (TabControl)ItemsControl.ItemsControlFromItemContainer(TabTearOffBehavior._activeTabItem);
                 if (activeTabControl == null ||
-                    !this.AdornedElement.Equals(activeTabControl) && !handler.AllowTargetedDrop(activeTabControl.ItemContainerGenerator.ItemFromContainer(TabTearOffBehavior.ActiveTabItem), activeTabControl, activeTabControl.ItemContainerGenerator.IndexFromContainer(TabTearOffBehavior.ActiveTabItem), this.AdornedElement, insertionIndex) ||
-                    this.AdornedElement.Equals(activeTabControl) && !handler.AllowReorder(activeTabControl.ItemContainerGenerator.ItemFromContainer(TabTearOffBehavior.ActiveTabItem), activeTabControl, activeTabControl.ItemContainerGenerator.IndexFromContainer(TabTearOffBehavior.ActiveTabItem), insertionIndex))
+                    !this.AdornedElement.Equals(activeTabControl) && !handler.AllowTargetedDrop(activeTabControl.ItemContainerGenerator.ItemFromContainer(TabTearOffBehavior._activeTabItem), activeTabControl, activeTabControl.ItemContainerGenerator.IndexFromContainer(TabTearOffBehavior._activeTabItem), this.AdornedElement, insertionIndex) ||
+                    this.AdornedElement.Equals(activeTabControl) && !handler.AllowReorder(activeTabControl.ItemContainerGenerator.ItemFromContainer(TabTearOffBehavior._activeTabItem), activeTabControl, activeTabControl.ItemContainerGenerator.IndexFromContainer(TabTearOffBehavior._activeTabItem), insertionIndex))
                 {
                     return;
                 }
@@ -619,10 +596,10 @@ namespace PoMo.Client.Controls
                 InsertionAdorner.CreateLineSegments(
                     figure,
                     new Point(0, -InsertionAdorner.Size),
-                    new Point(0, -InsertionAdorner.Size / 3.0),
-                    new Point(-InsertionAdorner.Size, -InsertionAdorner.Size / 3.0),
-                    new Point(-InsertionAdorner.Size, InsertionAdorner.Size / 3.0),
-                    new Point(0, InsertionAdorner.Size / 3.0),
+                    new Point(0, -InsertionAdorner.Size / 3d),
+                    new Point(-InsertionAdorner.Size, -InsertionAdorner.Size / 3d),
+                    new Point(-InsertionAdorner.Size, InsertionAdorner.Size / 3d),
+                    new Point(0, InsertionAdorner.Size / 3d),
                     new Point(0, InsertionAdorner.Size),
                     new Point(InsertionAdorner.Size, 0)
                 );
