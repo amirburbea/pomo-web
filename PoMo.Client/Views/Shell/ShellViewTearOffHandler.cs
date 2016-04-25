@@ -3,7 +3,7 @@ using System.Windows.Controls;
 using PoMo.Client.Controls;
 using PoMo.Common.Windsor;
 
-namespace PoMo.Client.Shell
+namespace PoMo.Client.Views.Shell
 {
     internal sealed class ShellViewTearOffHandler : ITabTearOffHandler
     {
@@ -49,8 +49,8 @@ namespace PoMo.Client.Shell
             {
                 return;
             }
-            ShellView shellView = tabControl.FindVisualTreeAncestor<ShellView>();
-            using (shellView.CreateIgnoreSelectionChangedScope())
+            ShellView shellView = (ShellView)Window.GetWindow(tabControl);
+            using (shellView?.CreateIgnoreSelectionChangedScope())
             {
                 tabControl.Items.RemoveAt(sourceIndex);
                 tabControl.Items.Insert(tabIndex, item);
@@ -67,18 +67,18 @@ namespace PoMo.Client.Shell
             {
                 return;
             }
-            ShellView view = sourceTabControl.FindVisualTreeAncestor<ShellView>();
+            ShellView view = (ShellView)Window.GetWindow(sourceTabControl);
             view.Close();
             this._shellViewFactory.Release(view);
         }
 
         void ITabTearOffHandler.HandleTargetlessDrop(object item, TabControl sourceTabControl, int sourceIndex, Point dropLocation)
         {
-            ShellView shellView = sourceTabControl.FindVisualTreeAncestor<ShellView>();
+            ShellView shellView = (ShellView)Window.GetWindow(sourceTabControl);
             if (sourceTabControl.Items.Count != 1)
             {
                 // Create a new ShellView to hold the tab.
-                ShellView view = this._shellViewFactory.Resolve();
+                ShellView view = this._shellViewFactory.Create();
                 view.Left = dropLocation.X;
                 view.Top = dropLocation.Y;
                 view.Height = shellView.WindowState == WindowState.Normal ? shellView.ActualHeight : shellView.RestoreBounds.Height;

@@ -51,14 +51,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataObjects\FirmSummaryModel.cs" />
     <Compile Include="DataObjects\PortfolioModel.cs" />
     <Compile Include="DataObjects\Tick.cs" />
     <Compile Include="DataObjects\TickData.cs" />
     <Compile Include="ServiceModel\BindingFactory.cs" />
-    <Compile Include="ServiceModel\Contracts\IClientContract.cs" />
-    <Compile Include="ServiceModel\Contracts\IServiceContract.cs" />
+    <Compile Include="ServiceModel\Contracts\ICallbackContract.cs" />
+    <Compile Include="ServiceModel\Contracts\IServerContract.cs" />
     <Compile Include="ServiceModel\Namespace.cs" />
-    <Compile Include="ServiceModel\ServiceClient.cs" />
     <Compile Include="Windsor\FactoryMethods.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="System\TaskApm.cs" />

@@ -15,7 +15,7 @@ namespace PoMo.Server
             container
                 .Register(Component.For<IWindowsService>().ImplementedBy<Application>())
                 .Register(Component.For<DataContext>())
-                .Register(Component.For<IServiceContract>().ImplementedBy<WcfService>())
+                .Register(Component.For<IServerContract>().ImplementedBy<WcfService>())
                 .Register(Component.For<Binding>().UsingFactoryMethod(BindingFactory.CreateBinding));
         }
     }

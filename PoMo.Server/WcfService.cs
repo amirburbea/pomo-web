@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Data;
 using System.ServiceModel;
 using System.Threading;
@@ -11,16 +12,14 @@ using PoMo.Common.System;
 namespace PoMo.Server
 {
     [ServiceBehavior(Namespace = Namespace.Value, InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple, MaxItemsInObjectGraph = 0x400000)]
-    public sealed class WcfService : IServiceContract
+    public sealed class WcfService : IServerContract
     {
-        IAsyncResult IServiceContract.BeginGetData(string portfolioId, AsyncCallback callback, object state)
+        private readonly ConcurrentDictionary<string, Client> _clients = new ConcurrentDictionary<string, Client>();
+
+        IAsyncResult IServerContract.BeginRegisterClient(AsyncCallback callback, object state)
         {
             return Task.Factory.StartNew(
-                arg =>
-                {
-                    OperationContext context = (OperationContext)arg;
-                    return this.GetData(portfolioId, context.SessionId, context.GetCallbackChannel<IClientContract>());
-                },
+                arg => this.RegisterClient((OperationContext)arg),
                 OperationContext.Current,
                 CancellationToken.None,
                 TaskCreationOptions.None,
@@ -28,7 +27,40 @@ namespace PoMo.Server
             ).ToApm(callback, state);
         }
 
-        IAsyncResult IServiceContract.BeginGetPortfolios(AsyncCallback callback, object state)
+        void IServerContract.EndRegisterClient(IAsyncResult result)
+        {
+            TaskApm.EndInvoke(result);
+        }
+
+        private void RegisterClient(OperationContext context)
+        {
+            if (context.SessionId == null)
+            {
+                return;
+            }
+            ICallbackContract callback = context.GetCallbackChannel<ICallbackContract>();
+            this._clients.TryAdd(context.SessionId, new Client(context.SessionId, callback));
+            ICommunicationObject channel = (ICommunicationObject)callback;
+            channel.Closed += this.ClientChannel_ClosedOrFaulted;
+            channel.Faulted += this.ClientChannel_ClosedOrFaulted;
+        }
+
+        private void ClientChannel_ClosedOrFaulted(object sender, EventArgs e)
+        {
+        }
+
+        IAsyncResult IServerContract.BeginGetData(string portfolioId, AsyncCallback callback, object state)
+        {
+            return Task.Factory.StartNew(
+                arg => this.GetData(portfolioId, ((OperationContext)arg).SessionId),
+                OperationContext.Current,
+                CancellationToken.None,
+                TaskCreationOptions.None,
+                TaskScheduler.Default
+            ).ToApm(callback, state);
+        }
+
+        IAsyncResult IServerContract.BeginGetPortfolios(AsyncCallback callback, object state)
         {
             return Task.Factory.StartNew(
                 arg => this.GetPortfolios(((OperationContext)arg).SessionId),
@@ -39,7 +71,7 @@ namespace PoMo.Server
             ).ToApm(callback, state);
         }
 
-        IAsyncResult IServiceContract.BeginUnsubscribe(string portfolioId, AsyncCallback callback, object state)
+        IAsyncResult IServerContract.BeginUnsubscribe(string portfolioId, AsyncCallback callback, object state)
         {
             return Task.Factory.StartNew(
                 arg => this.Unsubscribe(portfolioId, ((OperationContext)arg).SessionId),
@@ -50,22 +82,22 @@ namespace PoMo.Server
             ).ToApm(callback, state);
         }
 
-        DataSet IServiceContract.EndGetData(IAsyncResult result)
+        DataSet IServerContract.EndGetData(IAsyncResult result)
         {
             return TaskApm.EndInvoke<DataSet>(result);
         }
 
-        PortfolioModel[] IServiceContract.EndGetPortfolios(IAsyncResult result)
+        PortfolioModel[] IServerContract.EndGetPortfolios(IAsyncResult result)
         {
             return TaskApm.EndInvoke<PortfolioModel[]>(result);
         }
 
-        void IServiceContract.EndUnsubscribe(IAsyncResult result)
+        void IServerContract.EndUnsubscribe(IAsyncResult result)
         {
             TaskApm.EndInvoke(result);
         }
 
-        private DataSet GetData(string portfolioId, string sessionId, IClientContract callback)
+        private DataSet GetData(string portfolioId, string sessionId)
         {
             return null;
         }
@@ -78,5 +110,25 @@ namespace PoMo.Server
         private void Unsubscribe(string porfolioId, string sessionId)
         {
         }
+
+        private class Client
+        {
+            public string SessionId
+            {
+                get;
+            }
+            public ICallbackContract Callback
+            {
+                get;
+            }
+
+            public Client(string sessionId, ICallbackContract callback)
+            {
+                this.SessionId = sessionId;
+                this.Callback = callback;
+            }
+        }
     }
+
+    
 }

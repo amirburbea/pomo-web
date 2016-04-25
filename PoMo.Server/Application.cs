@@ -10,10 +10,10 @@ namespace PoMo.Server
     public sealed class Application : IWindowsService
     {
         private readonly Binding _binding;
-        private readonly IFactory<IServiceContract> _serviceFactory;
+        private readonly IFactory<IServerContract> _serviceFactory;
         private ServiceHost _host;
 
-        public Application(IFactory<IServiceContract> serviceFactory, Binding binding)
+        public Application(IFactory<IServerContract> serviceFactory, Binding binding)
         {
             this._serviceFactory = serviceFactory;
             this._binding = binding;
@@ -21,8 +21,8 @@ namespace PoMo.Server
 
         void IWindowsService.Start()
         {
-            this._host = new ServiceHost(this._serviceFactory.Resolve());
-            this._host.AddServiceEndpoint(typeof(IServiceContract), this._binding, Settings.Default.WcfUri);
+            this._host = new ServiceHost(this._serviceFactory.Create());
+            this._host.AddServiceEndpoint(typeof(IServerContract), this._binding, Settings.Default.WcfUri);
             this._host.Description.Behaviors.Find<ServiceDebugBehavior>().IncludeExceptionDetailInFaults = true;
             this._host.Open();
         }
@@ -30,7 +30,7 @@ namespace PoMo.Server
         void IWindowsService.Stop()
         {
             this._host.Close();
-            this._serviceFactory.Release((IServiceContract)this._host.SingletonInstance);
+            this._serviceFactory.Release((IServerContract)this._host.SingletonInstance);
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace PoMo.Client.Controls
+namespace PoMo.Client.Views
 {
     public abstract class NotifierBase : INotifyPropertyChanged
     {

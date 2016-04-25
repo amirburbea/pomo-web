@@ -74,20 +74,40 @@
     <Compile Include="ConnectionStatus.cs" />
     <Compile Include="Controls\ControlMethods.cs" />
     <Compile Include="Controls\ITabTearOffHandler.cs" />
-    <Compile Include="Shell\ShellViewModel.cs" />
-    <Compile Include="Controls\NotifierBase.cs" />
-    <Compile Include="Shell\ShellViewTearOffHandler.cs" />
+    <Compile Include="Converters\ObjectIsNullConverter.cs" />
+    <Compile Include="Views\FirmSummary\FirmSummaryView.xaml.cs">
+      <DependentUpon>FirmSummaryView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FirmSummary\FirmSummaryViewModel.cs" />
+    <Compile Include="Views\FirmSummary\WindsorInstaller.cs" />
+    <Compile Include="Views\ISubscriber.cs" />
+    <Compile Include="Views\Positions\PositionsView.xaml.cs">
+      <DependentUpon>PositionsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Positions\PositionsViewModel.cs" />
+    <Compile Include="Views\Positions\WindsorInstaller.cs" />
+    <Compile Include="Views\Shell\ShellViewModel.cs" />
+    <Compile Include="Views\NotifierBase.cs" />
+    <Compile Include="Views\Shell\ShellViewTearOffHandler.cs" />
     <Compile Include="Controls\TabTearOffBehavior.cs" />
     <Compile Include="Controls\VisualTreeMethods.cs" />
-    <Compile Include="Controls\WindsorInstaller.cs" />
+    <Compile Include="Views\WindsorInstaller.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Shell\WindsorInstaller.cs" />
+    <Compile Include="Views\Shell\WindsorInstaller.cs" />
     <Compile Include="WindsorInstaller.cs" />
-    <Page Include="Shell\MenuResources.xaml">
+    <Page Include="Views\FirmSummary\FirmSummaryView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Shell\ShellView.xaml">
+    <Page Include="Views\Positions\PositionsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Shell\MenuResources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Shell\ShellView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -97,19 +117,19 @@
     </Compile>
     <Compile Include="DataBoundObjects\DataBoundObject.cs" />
     <Compile Include="DataBoundObjects\DataBoundObjectCollection.cs" />
-    <Compile Include="Shell\ShellView.xaml.cs">
+    <Compile Include="Views\Shell\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Shell\StatusBarResources.xaml">
+    <Page Include="Views\Shell\StatusBarResources.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Shell\TabControlResources.xaml">
+    <Page Include="Views\Shell\TabControlResources.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Shell\WindowResources.xaml">
+    <Page Include="Views\Shell\WindowResources.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -36,8 +36,7 @@
                             <Border x:Name="GlyphPanel" Background="#E6EFF4" BorderBrush="#CDD3E6" BorderThickness="1" CornerRadius="3" Margin="1" Visibility="Hidden" Width="22" Height="22">
                                 <Path Name="Glyph" Width="9" Height="11" Fill="#0C12A1" FlowDirection="LeftToRight" Data="{StaticResource Checkmark}"/>
                             </Border>
-                            <ContentPresenter Grid.Column="2" ContentSource="Header" Margin="{TemplateBinding MenuItem.Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
-                                VerticalAlignment="Center"/>
+                            <ContentPresenter Grid.Column="2" ContentSource="Header" Margin="{TemplateBinding MenuItem.Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="4" Text="{TemplateBinding MenuItem.InputGestureText}" Margin="{TemplateBinding MenuItem.Padding}" Visibility="Collapsed"/>
                             <Path x:Name="RightArrow" Grid.Column="5" VerticalAlignment="Center" Margin="4,0,0,0" Fill="{TemplateBinding MenuItem.Foreground}" Data="{StaticResource RightArrow}"/>
                         </Grid>

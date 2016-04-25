@@ -1,7 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
-    xmlns:shell="clr-namespace:PoMo.Client.Shell"
+    xmlns:shell="clr-namespace:PoMo.Client.Views.Shell"
     xmlns:system="clr-namespace:System;assembly=mscorlib">
     <Style TargetType="{x:Type TabControl}">
         <Style.Resources>
@@ -42,6 +42,11 @@
                         <ToggleButton x:Name="LockButton" IsChecked="{Binding Path=(shell:ShellViewTearOffHandler.IsLocked), RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" Grid.Column="1" Margin="2,0">
                             <ToggleButton.Style>
                                 <Style TargetType="{x:Type ToggleButton}">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter Property="ToolTip" Value="Click to unlock the tabs and allow them to be dragged." />
+                                        </Trigger>
+                                    </Style.Triggers>
                                     <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                     <Setter Property="ClickMode" Value="Press" />
                                     <Setter Property="IsThreeState" Value="False" />
@@ -69,6 +74,7 @@
                                             </ControlTemplate>
                                         </Setter.Value>
                                     </Setter>
+                                    <Setter Property="ToolTip" Value="Click to lock the tabs and prevent them from being dragged." />
                                 </Style>
                             </ToggleButton.Style>
                         </ToggleButton>

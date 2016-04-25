@@ -1,5 +1,5 @@
 ﻿using System.Windows;
-using PoMo.Client.Shell;
+using PoMo.Client.Views.Shell;
 using PoMo.Common.Windsor;
 
 namespace PoMo.Client
@@ -21,7 +21,7 @@ namespace PoMo.Client
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            (this.MainWindow = this._mainWindowFactory.Resolve()).Show();
+            (this.MainWindow = this._mainWindowFactory.Create()).Show();
             base.OnStartup(e);
         }
     }

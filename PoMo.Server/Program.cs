@@ -25,7 +25,7 @@ namespace PoMo.Server
             {
                 using (IWindsorContainer container = new WindsorContainer())
                 {
-                    FactoryMethods.RegisterFactory(container);
+                    FactoryMethods.RegisterFactories(container);
                     container.Install(FromAssembly.InThisApplication());
                     HostFactory.Run(Program.TopshelfConfiguration(container));
                 }

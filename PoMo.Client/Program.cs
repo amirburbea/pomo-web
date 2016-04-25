@@ -13,7 +13,7 @@ namespace PoMo.Client
         {
             using (IWindsorContainer container = new WindsorContainer())
             {
-                FactoryMethods.RegisterFactory(container);
+                FactoryMethods.RegisterFactories(container);
                 container.Install(FromAssembly.This());
                 container.Resolve<Application>().Run();
             }

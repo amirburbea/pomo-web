@@ -39,13 +39,11 @@ namespace PoMo.Client.Controls
 
         public static IEnumerable<DependencyObject> GetVisualTreeChildren(this DependencyObject parent)
         {
-            return parent == null ?
-                Enumerable.Empty<DependencyObject>() :
-                Enumerable.Range(0, VisualTreeHelper.GetChildrenCount(parent)).Select(index => VisualTreeHelper.GetChild(parent, index));
+            return parent == null ? Enumerable.Empty<DependencyObject>() : Enumerable.Range(0, VisualTreeHelper.GetChildrenCount(parent)).Select(index => VisualTreeHelper.GetChild(parent, index));
         }
 
         public static IEnumerable<TDescendent> GetVisualTreeDescendents<TDescendent>(this DependencyObject dependencyObject)
-                            where TDescendent : DependencyObject
+            where TDescendent : DependencyObject
         {
             return dependencyObject?.GetVisualTreeDescendents(typeof(TDescendent)).Cast<TDescendent>() ?? Enumerable.Empty<TDescendent>();
         }

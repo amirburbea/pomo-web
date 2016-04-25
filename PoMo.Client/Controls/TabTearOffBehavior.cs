@@ -52,30 +52,20 @@ namespace PoMo.Client.Controls
 
         internal static int DetermineInsertionIndex(ItemsControl tabControl, MouseEventArgs mouseEventArgs, Orientation panelOrientation)
         {
-            Point tabControlPoint = mouseEventArgs.GetPosition(tabControl);
-            UIElement container = tabControl.GetItemContainerAtPosition(tabControlPoint) ??
-                ControlMethods.GetClosestItemContainerToPosition(tabControl, tabControlPoint, panelOrientation);
+            Point tabControlPosition = mouseEventArgs.GetPosition(tabControl);
+            UIElement container = tabControl.GetItemContainerAtPosition(tabControlPosition) ?? ControlMethods.GetClosestItemContainerToPosition(tabControl, tabControlPosition, panelOrientation);
             if (container == null)
             {
                 return 0;
             }
-            int insertionIndex = tabControl.ItemContainerGenerator.IndexFromContainer(container);
-            switch (panelOrientation)
+            int index = tabControl.ItemContainerGenerator.IndexFromContainer(container);
+            Point containerPosition = mouseEventArgs.GetPosition(container);
+            if (panelOrientation == Orientation.Vertical && containerPosition.Y > container.RenderSize.Height / 2d || 
+                panelOrientation == Orientation.Horizontal && containerPosition.X > container.RenderSize.Width / 2d)
             {
-                case Orientation.Vertical:
-                    if (mouseEventArgs.GetPosition(container).Y > container.RenderSize.Height / 2.0)
-                    {
-                        insertionIndex++;
-                    }
-                    break;
-                case Orientation.Horizontal:
-                    if (mouseEventArgs.GetPosition(container).X > container.RenderSize.Width / 2.0)
-                    {
-                        insertionIndex++;
-                    }
-                    break;
+                index++;
             }
-            return insertionIndex;
+            return index;
         }
 
         internal static void SetIsDraggingOver(DependencyObject tabControl, bool isDraggingOver)
@@ -229,7 +219,7 @@ namespace PoMo.Client.Controls
 
         private static void SetWindowMaintainZIndex(DependencyObject d, bool maintainZIndex)
         {
-            Window window = d.FindVisualTreeAncestor<Window>();
+            Window window = Window.GetWindow(d);
             if (window == null)
             {
                 throw new ArgumentException("TabControl is not in a window");

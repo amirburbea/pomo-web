@@ -4,7 +4,7 @@ using PoMo.Common.DataObjects;
 
 namespace PoMo.Common.ServiceModel.Contracts
 {
-    public interface IClientContract
+    public interface ICallbackContract
     {
         [OperationContract(AsyncPattern = true, IsOneWay = false)]
         IAsyncResult BeginReceiveTicks(string portfolioId, TickData[] data, AsyncCallback callback, object state);

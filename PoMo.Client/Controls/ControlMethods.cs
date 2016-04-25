@@ -17,24 +17,24 @@ namespace PoMo.Client.Controls
             {
                 return null;
             }
-            // Build a line for hit tests.
+            List<UIElement> containers = new List<UIElement>();
             LineGeometry line;
             switch (orientation)
             {
                 case Orientation.Horizontal:
-                    line = new LineGeometry(new Point(0, point.Y), new Point(itemsControl.RenderSize.Width, point.Y));
+                    line = new LineGeometry(new Point(0d, point.Y), new Point(itemsControl.RenderSize.Width, point.Y));
                     break;
                 default:
-                    line = new LineGeometry(new Point(point.X, 0), new Point(point.X, itemsControl.RenderSize.Height));
+                    line = new LineGeometry(new Point(point.X, 0d), new Point(point.X, itemsControl.RenderSize.Height));
                     break;
             }
-            List<UIElement> containers = new List<UIElement>();
+            line.Freeze();
             VisualTreeHelper.HitTest(
                 itemsControl,
                 null,
-                hitTestResult =>
+                testResult => 
                 {
-                    UIElement itemContainer = hitTestResult.VisualHit.FindVisualTreeAncestor(itemContainerType) as UIElement;
+                    UIElement itemContainer = testResult.VisualHit.FindVisualTreeAncestor(itemContainerType) as UIElement;
                     if (itemContainer != null && itemsControl.Equals(ItemsControl.ItemsControlFromItemContainer(itemContainer)))
                     {
                         containers.Add(itemContainer);
@@ -123,20 +123,21 @@ namespace PoMo.Client.Controls
                     return tabPanel;
                 }
             }
-            DependencyObject itemsPresenter = null;
-            if (itemsControl.Items.Count != 0)
+            if (itemsControl.Items.Count == 0)
             {
-                DependencyObject d = container ?? itemsControl.ItemContainerGenerator.ContainerFromIndex(0);
-                if (d == null)
+                return null;
+            }
+            DependencyObject d = container ?? itemsControl.ItemContainerGenerator.ContainerFromIndex(0);
+            if (d == null)
+            {
+                return null;
+            }
+            DependencyObject itemsPresenter = null;
+            for (d = VisualTreeHelper.GetParent(d); d != null && !itemsControl.Equals(d); d = VisualTreeHelper.GetParent(d))
+            {
+                if ((itemsPresenter = d as ItemsPresenter) != null)
                 {
-                    return null;
-                }
-                for (d = VisualTreeHelper.GetParent(d); d != null && !itemsControl.Equals(d); d = VisualTreeHelper.GetParent(d))
-                {
-                    if ((itemsPresenter = d as ItemsPresenter) != null)
-                    {
-                        break;
-                    }
+                    break;
                 }
             }
             return itemsPresenter != null ? VisualTreeHelper.GetChild(itemsPresenter, 0) as Panel : null;

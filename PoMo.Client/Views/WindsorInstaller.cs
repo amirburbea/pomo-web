@@ -3,9 +3,9 @@ using System.Windows;
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
-using PoMo.Client.Shell;
+using PoMo.Client.Views.Shell;
 
-namespace PoMo.Client.Controls
+namespace PoMo.Client.Views
 {
     public sealed class WindsorInstaller : IWindsorInstaller
     {
@@ -14,7 +14,6 @@ namespace PoMo.Client.Controls
             container
                 .Register(Classes.FromThisAssembly().BasedOn<Window>().LifestyleTransient())
                 .Register(Classes.FromThisAssembly().Where(type => type != typeof(ShellViewModel) && type.Name.EndsWith("ViewModel", StringComparison.Ordinal)).LifestyleTransient());
-
         }
     }
 }

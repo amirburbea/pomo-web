@@ -13,7 +13,6 @@ namespace PoMo.Client
         {
             container
                 .Register(Component.For<Binding>().UsingFactoryMethod(BindingFactory.CreateBinding))
-                .Register(Component.For<IServiceChannelManager>().ImplementedBy<ServiceChannelManager>())
                 .Register(Component.For<Application>().ImplementedBy<App>().OnCreate(app => ((App)app).InitializeComponent()));
         }
     }

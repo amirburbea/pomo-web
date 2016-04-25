@@ -5,9 +5,14 @@ using PoMo.Common.DataObjects;
 
 namespace PoMo.Common.ServiceModel.Contracts
 {
-    [ServiceContract(CallbackContract = typeof(IClientContract), Namespace = Namespace.Value, SessionMode = SessionMode.Allowed)]
-    public interface IServiceContract
+    [ServiceContract(CallbackContract = typeof(ICallbackContract), Namespace = Namespace.Value, SessionMode = SessionMode.Allowed)]
+    public interface IServerContract
     {
+        [OperationContract(AsyncPattern = true, IsOneWay = false, IsInitiating = true)]
+        IAsyncResult BeginRegisterClient(AsyncCallback callback, object state);
+
+        void EndRegisterClient(IAsyncResult result);
+
         [OperationContract(AsyncPattern = true, IsOneWay = false)]
         IAsyncResult BeginGetData(string portfolioId, AsyncCallback callback, object state);
 
