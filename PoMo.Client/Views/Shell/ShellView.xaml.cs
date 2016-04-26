@@ -118,10 +118,12 @@ namespace PoMo.Client.Views.Shell
         }
 
         private static IEnumerable<TViewModel> GetOpenTabs<TViewModel>()
+            where TViewModel : class
         {
             return Application.Current.Windows.OfType<ShellView>()
-                .SelectMany(shellView => shellView.TabControl.Items.Cast<TabItem>(), (shellView, tabItem) => tabItem.DataContext)
-                .OfType<TViewModel>();
+                .SelectMany(shellView => shellView.TabControl.Items.Cast<TabItem>())
+                .Select(tabItem => tabItem.DataContext as TViewModel)
+                .Where(viewModel => viewModel != null);
         }
 
         private static bool IsFirmSummaryTabOpen()

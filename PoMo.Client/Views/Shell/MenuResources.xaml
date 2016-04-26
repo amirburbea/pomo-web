@@ -3,8 +3,6 @@
     xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
     xmlns:system="clr-namespace:System;assembly=mscorlib"
     xmlns:themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero">
-    <Geometry x:Key="RightArrow">M 0,0 L 4,3.5 L 0,7 Z</Geometry>
-    <Geometry x:Key="Checkmark">M 0,5.1 L 1.7,5.2 L 3.4,7.1 L 8,0.4 L 9.2,0 L 3.3,10.8 Z</Geometry>
     <SolidColorBrush x:Key="SubMenuBackgroundBrush" Color="#FFF5F5F5" po:Freeze="true" />
     <LinearGradientBrush x:Key="MenuItemSelectionFill" po:Freeze="true" StartPoint="0,0" EndPoint="0,1">
         <LinearGradientBrush.GradientStops>
@@ -33,12 +31,9 @@
                                 <ColumnDefinition Width="17"/>
                             </Grid.ColumnDefinitions>
                             <ContentPresenter x:Name="Icon" Margin="1" VerticalAlignment="Center" ContentSource="Icon" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                            <Border x:Name="GlyphPanel" Background="#E6EFF4" BorderBrush="#CDD3E6" BorderThickness="1" CornerRadius="3" Margin="1" Visibility="Hidden" Width="22" Height="22">
-                                <Path Name="Glyph" Width="9" Height="11" Fill="#0C12A1" FlowDirection="LeftToRight" Data="{StaticResource Checkmark}"/>
-                            </Border>
                             <ContentPresenter Grid.Column="2" ContentSource="Header" Margin="{TemplateBinding MenuItem.Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="4" Text="{TemplateBinding MenuItem.InputGestureText}" Margin="{TemplateBinding MenuItem.Padding}" Visibility="Collapsed"/>
-                            <Path x:Name="RightArrow" Grid.Column="5" VerticalAlignment="Center" Margin="4,0,0,0" Fill="{TemplateBinding MenuItem.Foreground}" Data="{StaticResource RightArrow}"/>
+                            <Path x:Name="RightArrow" Grid.Column="5" VerticalAlignment="Center" Margin="4,0,0,0" Fill="{TemplateBinding MenuItem.Foreground}" Data="M 0,0 L 4,3.5 L 0,7 Z"/>
                         </Grid>
                         <Popup x:Name="PART_Popup" AllowsTransparency="true" Placement="Right" VerticalOffset="-3" HorizontalOffset="-2" IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
                             Focusable="false" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
@@ -69,10 +64,6 @@
                         <Trigger Property="Icon" Value="{x:Null}">
                             <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
                         </Trigger>
-                        <Trigger Property="IsChecked" Value="true">
-                            <Setter TargetName="GlyphPanel" Property="Visibility" Value="Visible"/>
-                            <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
-                        </Trigger>
                         <Trigger SourceName="PART_Popup" Property="Popup.HasDropShadow" Value="true">
                             <Setter TargetName="Shdw" Property="Margin" Value="0,0,5,5"/>
                             <Setter TargetName="Shdw" Property="Color" Value="#71000000"/>
@@ -83,9 +74,6 @@
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="Foreground" Value="#FF9A9A9A"/>
-                            <Setter TargetName="GlyphPanel" Property="Background" Value="#EEE9E9"/>
-                            <Setter TargetName="GlyphPanel" Property="BorderBrush" Value="#DBD6D6"/>
-                            <Setter TargetName="Glyph" Property="Fill" Value="#848589"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -134,7 +122,7 @@
                                 </RadialGradientBrush>
                             </Border.Background>
                         </Border>
-                        <DockPanel x:Name="DP" RenderTransformOrigin="0.5,0.5">
+                        <DockPanel x:Name="DP" RenderTransformOrigin="0.5,1">
                             <DockPanel.Tag>
                                 <system:Double>1</system:Double>
                             </DockPanel.Tag>
@@ -142,14 +130,14 @@
                                 <ScaleTransform ScaleX="{Binding Tag, ElementName=DP}" ScaleY="{Binding Tag, ElementName=DP}" />
                             </DockPanel.RenderTransform>
                             <Image x:Name="Icon" Height="22" Width="22" Source="{Binding MainWindow.Icon, Source={x:Static Application.Current}}" VerticalAlignment="Center"
-					            SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" DockPanel.Dock="Left" Margin="4,0"/>
+					            SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="HighQuality" DockPanel.Dock="Left" Margin="4,0"/>
                             <Path x:Name="arrow" DockPanel.Dock="Right" Data="M 0,0 L 3.5,4 L 7,0 Z" Fill="White" Margin="5,0" VerticalAlignment="Center"/>
                             <ContentPresenter ContentSource="Header" VerticalAlignment="Center" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" TextBlock.Foreground="White" TextBlock.FontWeight="Bold" />
                         </DockPanel>
                         <Border x:Name="pressedBorder" BorderBrush="{Binding Path=(SystemColors.ControlDarkDarkBrush)}" BorderThickness="1" 
 						    Visibility="Collapsed" Grid.RowSpan="2">
                             <Border.Background>
-                                <RadialGradientBrush RadiusY="0.604" RadiusX="0.604" po:Freeze="True">
+                                <RadialGradientBrush RadiusY="0.7" RadiusX="0.7" po:Freeze="True">
                                     <GradientStop Color="#4C000000" Offset="1"/>
                                     <GradientStop/>
                                 </RadialGradientBrush>
@@ -162,9 +150,9 @@
                                 <Border BorderThickness="1" BorderBrush="Gray" SnapsToDevicePixels="True">
                                     <DockPanel>
                                         <DockPanel.Resources>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1" po:Freeze="True" x:Key="BorderBackground">
+                                            <LinearGradientBrush EndPoint="0,1" po:Freeze="True" x:Key="BorderBackground">
                                                 <LinearGradientBrush.GradientStops>
-                                                    <GradientStop Color="#D3D3D3" Offset="0" />
+                                                    <GradientStop Color="#D3D3D3" />
                                                     <GradientStop Color="#CBCBCB" Offset="0.5" />
                                                     <GradientStop Color="#CDCDCD" Offset="0.5" />
                                                     <GradientStop Color="#ADADAD" Offset="1" />

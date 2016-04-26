@@ -77,7 +77,7 @@ namespace PoMo.Client.Controls
         {
             for (int index = 0; index < TabTearOffBehavior._windows.Count; index++)
             {
-                TabTearOffBehavior.SetZIndex(TabTearOffBehavior._windows[index], index);
+                TabTearOffBehavior._windows[index].SetZIndex(index);
             }
         }
 
@@ -98,7 +98,7 @@ namespace PoMo.Client.Controls
             };
         }
 
-        private static TabControl FindTargetTabControl(DependencyObject dropWindow, out ITabTearOffHandler handler)
+        private static TabControl FindTargetTabControl(Window dropWindow, out ITabTearOffHandler handler)
         {
             handler = null;
             foreach (TabControl tabControl in dropWindow.GetVisualTreeDescendents<TabControl>())
@@ -227,7 +227,7 @@ namespace PoMo.Client.Controls
             TabTearOffBehavior.SetMaintainZIndex(window, maintainZIndex);
         }
 
-        private static void SetZIndex(Window window, int zIndex)
+        private static void SetZIndex(this Window window, int zIndex)
         {
             window.SetValue(TabTearOffBehavior._zIndexProperty, zIndex);
         }
@@ -338,7 +338,7 @@ namespace PoMo.Client.Controls
                     TabTearOffBehavior.IsMouseInDropLocation(e, targetTabControl = TabTearOffBehavior.FindTargetTabControl(dropWindow, out targetHandler), targetPanel = ControlMethods.GetPanel(targetTabControl)))
                 {
                     int insertionIndex = TabTearOffBehavior.DetermineInsertionIndex(targetTabControl, e, targetPanel.GetOrientation());
-                    if (!Object.ReferenceEquals(sourceTabControl, targetTabControl))
+                    if (!object.ReferenceEquals(sourceTabControl, targetTabControl))
                     {
                         if (targetHandler.AllowTargetedDrop(item, sourceTabControl, sourceIndex, targetTabControl, insertionIndex))
                         {
@@ -346,8 +346,8 @@ namespace PoMo.Client.Controls
                         }
                     }
                     else if (sourceTabControl.Items.Count != 1 &&
-                             insertionIndex != sourceIndex &&
-                             targetHandler.AllowReorder(item, sourceTabControl, sourceIndex, insertionIndex))
+                        insertionIndex != sourceIndex &&
+                        targetHandler.AllowReorder(item, sourceTabControl, sourceIndex, insertionIndex))
                     {
                         targetHandler.HandleReorder(item, sourceTabControl, sourceIndex, insertionIndex);
                     }
@@ -385,7 +385,7 @@ namespace PoMo.Client.Controls
                 Panel panel = ControlMethods.GetPanel(targetTabControl);
                 if (TabTearOffBehavior.IsMouseInDropLocation(e, targetTabControl, panel))
                 {
-                    if (TabTearOffBehavior._adorner == null || !Object.ReferenceEquals(TabTearOffBehavior._adorner.AdornedElement, targetTabControl))
+                    if (TabTearOffBehavior._adorner == null || !TabTearOffBehavior._adorner.AdornedElement.Equals(targetTabControl))
                     {
                         if (TabTearOffBehavior._adorner != null)
                         {
@@ -405,31 +405,33 @@ namespace PoMo.Client.Controls
             {
                 Rectangle contentRectangle = TabTearOffBehavior.CreateRectangle((Visual)TabTearOffBehavior.GetContent(tabControl));
                 Rectangle tabItemRectangle = TabTearOffBehavior.CreateRectangle(TabTearOffBehavior._activeTabItem);
-                StackPanel stackPanel;
-                if (tabControl.TabStripPlacement == Dock.Right || tabControl.TabStripPlacement == Dock.Bottom)
+                Panel.SetZIndex(tabItemRectangle, 10);
+                StackPanel stackPanel = new StackPanel
                 {
-                    stackPanel = new StackPanel
+                    Orientation = tabControl.TabStripPlacement == Dock.Right || tabControl.TabStripPlacement == Dock.Left ? Orientation.Horizontal : Orientation.Vertical,
+                    Children =
                     {
-                        Orientation = tabControl.TabStripPlacement == Dock.Right ? Orientation.Horizontal : Orientation.Vertical,
-                        Children =
-                        {
-                            contentRectangle,
-                            tabItemRectangle
-                        }
-                    };
-                }
-                else
+                        tabItemRectangle
+                    }
+                };
+                stackPanel.Children.Insert(tabControl.TabStripPlacement == Dock.Right || tabControl.TabStripPlacement == Dock.Bottom ? 0 : 1, contentRectangle);
+                TranslateTransform translateTransform = new TranslateTransform();
+                switch (tabControl.TabStripPlacement)
                 {
-                    stackPanel = new StackPanel
-                    {
-                        Orientation = tabControl.TabStripPlacement == Dock.Left ? Orientation.Horizontal : Orientation.Vertical,
-                        Children =
-                        {
-                            tabItemRectangle,
-                            contentRectangle
-                        }
-                    };
+                    case Dock.Bottom:
+                        translateTransform.Y = -1d;
+                        break;
+                    case Dock.Left:
+                        translateTransform.X = 1d;
+                        break;
+                    case Dock.Right:
+                        translateTransform.X = -1d;
+                        break;
+                    case Dock.Top:
+                        translateTransform.Y = 1d;
+                        break;
                 }
+                tabItemRectangle.RenderTransform = translateTransform;
                 TabTearOffBehavior._dragWindow = new Window
                 {
                     Topmost = true,
