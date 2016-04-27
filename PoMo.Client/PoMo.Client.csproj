@@ -71,23 +71,25 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="ConnectionManager.cs" />
     <Compile Include="ConnectionStatus.cs" />
     <Compile Include="Controls\ControlMethods.cs" />
     <Compile Include="Controls\ITabTearOffHandler.cs" />
     <Compile Include="Converters\ObjectIsNullConverter.cs" />
+    <Compile Include="TicksReceivedEventArgs.cs" />
     <Compile Include="Views\FirmSummary\FirmSummaryView.xaml.cs">
       <DependentUpon>FirmSummaryView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\FirmSummary\FirmSummaryViewModel.cs" />
     <Compile Include="Views\FirmSummary\WindsorInstaller.cs" />
-    <Compile Include="Views\ISubscriber.cs" />
+    <Compile Include="Views\Shell\ConnectionStatusControl.cs" />
+    <Compile Include="Views\SubscriberViewModelBase.cs" />
     <Compile Include="Views\Positions\PositionsView.xaml.cs">
       <DependentUpon>PositionsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Positions\PositionsViewModel.cs" />
     <Compile Include="Views\Positions\WindsorInstaller.cs" />
     <Compile Include="Views\Shell\ShellViewModel.cs" />
-    <Compile Include="Views\NotifierBase.cs" />
     <Compile Include="Views\Shell\ShellViewTearOffHandler.cs" />
     <Compile Include="Controls\TabTearOffBehavior.cs" />
     <Compile Include="Controls\VisualTreeMethods.cs" />
@@ -95,6 +97,10 @@
     <Compile Include="Program.cs" />
     <Compile Include="Views\Shell\WindsorInstaller.cs" />
     <Compile Include="WindsorInstaller.cs" />
+    <Page Include="Themes\Generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\FirmSummary\FirmSummaryView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

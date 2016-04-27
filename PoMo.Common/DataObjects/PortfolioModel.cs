@@ -2,7 +2,7 @@
 {
     public sealed class PortfolioModel
     {
-        public string Description
+        public string Name
         {
             get;
             set;

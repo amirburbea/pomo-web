@@ -7,6 +7,6 @@
     mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300"
     d:DataContext="{d:DesignInstance local:PositionsViewModel}">
     <Grid>
-        <TextBlock Text="{Binding Portfolio.Description}" />
+        <TextBlock Text="{Binding Portfolio.Name}" />
     </Grid>
 </UserControl>

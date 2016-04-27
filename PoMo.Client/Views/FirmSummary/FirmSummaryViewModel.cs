@@ -1,25 +1,19 @@
 ﻿using System;
+using PoMo.Common;
 
 namespace PoMo.Client.Views.FirmSummary
 {
-    public sealed class FirmSummaryViewModel : NotifierBase, ISubscriber, IDisposable
+    public sealed class FirmSummaryViewModel : NotifierBase, IDisposable
     {
-        public FirmSummaryViewModel()
-        {
-        }
+        private readonly IConnectionManager _connectionManager;
 
-        void ISubscriber.Subscribe()
+        public FirmSummaryViewModel(IConnectionManager connectionManager)
         {
-            
-        }
-
-        void ISubscriber.Unsubscribe()
-        {
+            this._connectionManager = connectionManager;
         }
 
         public void Dispose()
         {
-            
         }
     }
 }

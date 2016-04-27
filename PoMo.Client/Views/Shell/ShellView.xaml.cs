@@ -69,7 +69,7 @@ namespace PoMo.Client.Views.Shell
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            PropertyChangedEventManager.RemoveHandler(this.ViewModel, this.ViewModel_ConnectionStatusChanged, nameof(ShellViewModel.ConnectionStatus));
+            //PropertyChangedEventManager.RemoveHandler(this.ViewModel, this.ViewModel_ConnectionStatusChanged, nameof(ShellViewModel.ConnectionStatus));
             if (Application.Current.MainWindow.Equals(this))
             {
                 ShellView other = Application.Current.Windows.OfType<ShellView>().FirstOrDefault(view => !view.Equals(this));
@@ -195,7 +195,7 @@ namespace PoMo.Client.Views.Shell
             {
                 this.CreateFirmSummaryTab();
             }
-            PropertyChangedEventManager.AddHandler(this.ViewModel, this.ViewModel_ConnectionStatusChanged, nameof(ShellViewModel.ConnectionStatus));
+            //PropertyChangedEventManager.AddHandler(this.ViewModel, this.ViewModel_ConnectionStatusChanged, nameof(ShellViewModel.ConnectionStatus));
         }
 
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -206,20 +206,11 @@ namespace PoMo.Client.Views.Shell
             }
             if (e.RemovedItems.Count != 0)
             {
-                (((FrameworkElement)e.RemovedItems[0]).DataContext as ISubscriber)?.Unsubscribe();
+                
             }
             if (e.AddedItems.Count != 0)
             {
-                (((FrameworkElement)e.AddedItems[0]).DataContext as ISubscriber)?.Subscribe();
-            }
-        }
 
-        private void ViewModel_ConnectionStatusChanged(object sender, EventArgs e)
-        {
-            TabItem tabItem = (TabItem)this.TabControl.SelectedItem;
-            if (tabItem != null && this.ViewModel.ConnectionStatus == ConnectionStatus.Connected)
-            {
-                ((ISubscriber)tabItem.DataContext).Subscribe();
             }
         }
 

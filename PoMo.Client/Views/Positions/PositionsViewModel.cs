@@ -1,16 +1,17 @@
 using System;
 using PoMo.Client.Views.Shell;
+using PoMo.Common;
 using PoMo.Common.DataObjects;
 
 namespace PoMo.Client.Views.Positions
 {
-    public sealed class PositionsViewModel : NotifierBase, ISubscriber, IDisposable
+    public sealed class PositionsViewModel : NotifierBase, IDisposable
     {
-        private readonly ShellViewModel _shellViewModel;
+        private readonly IConnectionManager _connectionManager;
 
-        public PositionsViewModel(ShellViewModel shellViewModel, PortfolioModel parameter)
+        public PositionsViewModel(IConnectionManager connectionManager, PortfolioModel parameter)
         {
-            this._shellViewModel = shellViewModel;
+            this._connectionManager = connectionManager;
             this.Portfolio = parameter;
         }
 
@@ -19,18 +20,8 @@ namespace PoMo.Client.Views.Positions
             get;
         }
 
-        void ISubscriber.Subscribe()
-        {
-            
-        }
-
-        void ISubscriber.Unsubscribe()
-        {
-        }
-
         public void Dispose()
         {
-            
         }
     }
 }

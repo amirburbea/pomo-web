@@ -55,13 +55,15 @@
     <Compile Include="DataObjects\PortfolioModel.cs" />
     <Compile Include="DataObjects\Tick.cs" />
     <Compile Include="DataObjects\TickData.cs" />
+    <Compile Include="NotifierBase.cs" />
     <Compile Include="ServiceModel\BindingFactory.cs" />
     <Compile Include="ServiceModel\Contracts\ICallbackContract.cs" />
+    <Compile Include="ServiceModel\Contracts\IHeartbeatContract.cs" />
     <Compile Include="ServiceModel\Contracts\IServerContract.cs" />
     <Compile Include="ServiceModel\Namespace.cs" />
+    <Compile Include="ServiceModel\ServiceModelMethods.cs" />
     <Compile Include="Windsor\FactoryMethods.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="System\TaskApm.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

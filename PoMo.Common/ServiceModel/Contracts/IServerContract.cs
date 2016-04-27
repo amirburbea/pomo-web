@@ -1,31 +1,28 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 using System.ServiceModel;
 using PoMo.Common.DataObjects;
 
 namespace PoMo.Common.ServiceModel.Contracts
 {
     [ServiceContract(CallbackContract = typeof(ICallbackContract), Namespace = Namespace.Value, SessionMode = SessionMode.Allowed)]
-    public interface IServerContract
+    public interface IServerContract : IHeartbeatContract
     {
-        [OperationContract(AsyncPattern = true, IsOneWay = false, IsInitiating = true)]
-        IAsyncResult BeginRegisterClient(AsyncCallback callback, object state);
+        [OperationContract]
+        PortfolioModel[] GetPortfolios();
 
-        void EndRegisterClient(IAsyncResult result);
+        [OperationContract(IsOneWay = false, IsInitiating = true)]
+        void RegisterClient();
 
-        [OperationContract(AsyncPattern = true, IsOneWay = false)]
-        IAsyncResult BeginGetData(string portfolioId, AsyncCallback callback, object state);
+        [OperationContract]
+        DataTable SubscribeToPortfolio(string portfolioId);
 
-        DataSet EndGetData(IAsyncResult result);
+        [OperationContract]
+        DataTable SubscribeToFirmSummary();
 
-        [OperationContract(AsyncPattern = true, IsOneWay = false)]
-        IAsyncResult BeginUnsubscribe(string portfolioId, AsyncCallback callback, object state);
+        [OperationContract(IsOneWay = false)]
+        void UnsubscribeFromPortfolio(string portfolioId);
 
-        void EndUnsubscribe(IAsyncResult result);
-
-        [OperationContract(AsyncPattern = true, IsOneWay = false)]
-        IAsyncResult BeginGetPortfolios(AsyncCallback callback, object state);
-
-        PortfolioModel[] EndGetPortfolios(IAsyncResult result);
+        [OperationContract(IsOneWay = false)]
+        void UnsubscribeFromFirmSummary();
     }
 }
