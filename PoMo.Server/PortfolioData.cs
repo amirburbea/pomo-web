@@ -73,17 +73,13 @@ namespace PoMo.Server
         private static readonly DataTable _dataSchemaTable = PortfolioDatum.CreateDataSchemaTable();
         private static readonly Func<Position, object[]> _rowProjection = PortfolioDatum.CreateRowProjection();
 
+        private readonly DataTable _dataTable;
         private readonly Portfolio _portfolio;
 
         public PortfolioDatum(Portfolio portfolio, IDataContext dataContext)
         {
             this._portfolio = portfolio;
-            this.DataTable = PortfolioDatum._dataSchemaTable.Clone();
-        }
-
-        public DataTable DataTable
-        {
-            get;
+            this._dataTable = PortfolioDatum._dataSchemaTable.Clone();
         }
 
         public string PortfolioId => this._portfolio.Id;

@@ -76,7 +76,8 @@
     <Compile Include="Controls\ControlMethods.cs" />
     <Compile Include="Controls\ITabTearOffHandler.cs" />
     <Compile Include="Converters\ObjectIsNullConverter.cs" />
-    <Compile Include="TicksReceivedEventArgs.cs" />
+    <Compile Include="PortfolioChangeEventArgs.cs" />
+    <Compile Include="ChangeEventArgs.cs" />
     <Compile Include="Views\FirmSummary\FirmSummaryView.xaml.cs">
       <DependentUpon>FirmSummaryView.xaml</DependentUpon>
     </Compile>

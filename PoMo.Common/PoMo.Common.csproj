@@ -51,10 +51,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataObjects\ColumnChange.cs" />
     <Compile Include="DataObjects\FirmSummaryModel.cs" />
     <Compile Include="DataObjects\PortfolioModel.cs" />
-    <Compile Include="DataObjects\Tick.cs" />
-    <Compile Include="DataObjects\TickData.cs" />
+    <Compile Include="DataObjects\RowAdded.cs" />
+    <Compile Include="DataObjects\RowRemoved.cs" />
+    <Compile Include="DataObjects\RowChangeBase.cs" />
+    <Compile Include="DataObjects\RowChangeType.cs" />
+    <Compile Include="DataObjects\RowColumnsChanged.cs" />
     <Compile Include="NotifierBase.cs" />
     <Compile Include="ServiceModel\BindingFactory.cs" />
     <Compile Include="ServiceModel\Contracts\ICallbackContract.cs" />

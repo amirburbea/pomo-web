@@ -14,15 +14,15 @@ namespace PoMo.Common.ServiceModel.Contracts
         void RegisterClient();
 
         [OperationContract]
-        DataTable SubscribeToPortfolio(string portfolioId);
-
-        [OperationContract]
         DataTable SubscribeToFirmSummary();
 
-        [OperationContract(IsOneWay = false)]
-        void UnsubscribeFromPortfolio(string portfolioId);
+        [OperationContract]
+        DataTable SubscribeToPortfolio(string portfolioId);
 
         [OperationContract(IsOneWay = false)]
         void UnsubscribeFromFirmSummary();
+
+        [OperationContract(IsOneWay = false)]
+        void UnsubscribeFromPortfolio(string portfolioId);
     }
 }

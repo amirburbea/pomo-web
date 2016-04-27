@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
@@ -16,7 +18,9 @@ namespace PoMo.Client
     {
         event EventHandler ConnectionStatusChanged;
 
-        event EventHandler<TicksReceivedEventArgs> TicksReceived;
+        event EventHandler<ChangeEventArgs> FirmSummaryChanged;
+
+        event EventHandler<PortfolioChangeEventArgs> PortfolioChanged;
 
         ConnectionStatus ConnectionStatus
         {
@@ -24,6 +28,10 @@ namespace PoMo.Client
         }
 
         Task<PortfolioModel[]> GetPortfoliosAsync();
+
+        Task<DataTable> SubscribeToFirmSummaryAsync();
+
+        Task<DataTable> SubscribeToPortfolioAsync(string portfolioId);
     }
 
     internal sealed class ConnectionManager : IConnectionManager, IDisposable
@@ -56,7 +64,9 @@ namespace PoMo.Client
 
         public event EventHandler ConnectionStatusChanged;
 
-        public event EventHandler<TicksReceivedEventArgs> TicksReceived;
+        public event EventHandler<ChangeEventArgs> FirmSummaryChanged;
+
+        public event EventHandler<PortfolioChangeEventArgs> PortfolioChanged;
 
         public ConnectionStatus ConnectionStatus
         {
@@ -91,11 +101,21 @@ namespace PoMo.Client
             ServiceModelMethods.TryDispose(this._factory);
         }
 
-        public Task<PortfolioModel[]> GetPortfoliosAsync()
+        Task<PortfolioModel[]> IConnectionManager.GetPortfoliosAsync()
         {
             TaskCompletionSource<PortfolioModel[]> source = new TaskCompletionSource<PortfolioModel[]>();
 
             return source.Task;
+        }
+
+        Task<DataTable> IConnectionManager.SubscribeToFirmSummaryAsync()
+        {
+            return null;
+        }
+
+        Task<DataTable> IConnectionManager.SubscribeToPortfolioAsync(string portfolioId)
+        {
+            return null;
         }
 
         private void Channel_ClosedOrFaulted(object sender, EventArgs e)
@@ -130,9 +150,14 @@ namespace PoMo.Client
             this.ConnectionStatusChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private void OnTicksReceived(string portfolioId, TickData[] data)
+        private void OnFirmSummaryChanged(IReadOnlyCollection<RowChangeBase> changes)
         {
-            this.TicksReceived?.Invoke(this, new TicksReceivedEventArgs(portfolioId, Array.AsReadOnly(data)));
+            this.FirmSummaryChanged?.Invoke(this, new ChangeEventArgs(changes));
+        }
+
+        private void OnPortfolioChanged(string portfolioId, IReadOnlyCollection<RowChangeBase> changes)
+        {
+            this.PortfolioChanged?.Invoke(this, new PortfolioChangeEventArgs(portfolioId, changes));
         }
 
         private void Run()
@@ -180,10 +205,21 @@ namespace PoMo.Client
                 this._connectionManager = connectionManager;
             }
 
-            void ICallbackContract.ReceiveTicks(string portfolioId, TickData[] data)
+            void ICallbackContract.OnFirmSummaryChanged(RowChangeBase[] changes)
             {
                 Task.Factory.StartNew(
-                    () => this._connectionManager.OnTicksReceived(portfolioId, data),
+                    arg => this._connectionManager.OnFirmSummaryChanged((RowChangeBase[])arg),
+                    changes,
+                    CancellationToken.None,
+                    TaskCreationOptions.None,
+                    TaskScheduler.Default
+                );
+            }
+
+            void ICallbackContract.OnPortfolioChanged(string portfolioId, RowChangeBase[] changes)
+            {
+                Task.Factory.StartNew(
+                    () => this._connectionManager.OnPortfolioChanged(portfolioId, changes),
                     CancellationToken.None,
                     TaskCreationOptions.None,
                     TaskScheduler.Default
