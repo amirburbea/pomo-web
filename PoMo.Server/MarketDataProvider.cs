@@ -49,14 +49,20 @@ namespace PoMo.Server
 
         private void Timer_Elapsed(object state)
         {
-            int[] ordinals = new int[this._random.Next(5, 10)];
+            int count = this._random.Next(0, 10);
+            if (count == 0)
+            {
+                return;
+            }
+            int[] ordinals = new int[count];
             this._random.PopulateRandomOrdinals(ordinals, this._tickers.Count);
             PriceChange[] priceChanges = new PriceChange[ordinals.Length];
             for (int index = 0; index < ordinals.Length; index++)
             {
                 int ordinal = ordinals[index];
                 decimal percent = this._random.Next(80, 125) / 100m;
-                decimal newPrice = this._prices[ordinal] *= percent;
+                decimal oldPrice = this._prices[ordinal];
+                decimal newPrice = this._prices[ordinal] = oldPrice * percent;
                 priceChanges[index] = new PriceChange(this._tickers[ordinal], newPrice);
             }
             this.OnPricesChanged(priceChanges);
