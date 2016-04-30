@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using PoMo.Common.DataObjects;
 
 namespace PoMo.Client
