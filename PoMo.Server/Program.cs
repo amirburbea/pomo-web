@@ -41,11 +41,11 @@ namespace PoMo.Server
         {
             return hostConfig =>
             {
-                hostConfig.Service<IWindowsService>(serviceConfig =>
+                hostConfig.Service<IApplication>(config =>
                 {
-                    serviceConfig.ConstructUsing(container.Resolve<IWindowsService>);
-                    serviceConfig.WhenStarted(service => service.Start());
-                    serviceConfig.WhenStopped(service => service.Stop());
+                    config.ConstructUsing(container.Resolve<IApplication>);
+                    config.WhenStarted(application => application.Start());
+                    config.WhenStopped(application => application.Stop());
                 });
                 string serviceName = Assembly.GetExecutingAssembly().GetName().Name;
                 hostConfig.SetServiceName(serviceName);

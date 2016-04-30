@@ -1,10 +1,10 @@
-﻿namespace PoMo.Common.DataObjects
+﻿using System;
+
+namespace PoMo.Common.DataObjects
 {
+    [Serializable]
     public sealed class RowRemoved : RowChangeBase
     {
-        public RowRemoved()
-            : base(RowChangeType.Removed)
-        {
-        }
+        public override RowChangeType ChangeType => RowChangeType.Removed;
     }
 }

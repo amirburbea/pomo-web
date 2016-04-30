@@ -76,7 +76,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Application.cs" />
-    <Compile Include="IWindowsService.cs" />
+    <Compile Include="DataEventArgs.cs" />
+    <Compile Include="DataTableClone.cs" />
+    <Compile Include="FirmData.cs" />
+    <Compile Include="ISubscribable.cs" />
+    <Compile Include="MarketDataProvider.cs" />
+    <Compile Include="Position.cs" />
+    <Compile Include="PriceChange.cs" />
+    <Compile Include="RandomMethods.cs" />
+    <Compile Include="TradeFactory.cs" />
     <Compile Include="PortfolioData.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -85,7 +93,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="PortfolioService.cs" />
+    <Compile Include="DataService.cs" />
     <Compile Include="WindsorInstaller.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,19 +1,42 @@
 ﻿using System;
-using PoMo.Common;
+using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks;
+using System.Windows.Threading;
+using PoMo.Common.DataObjects;
 
 namespace PoMo.Client.Views.FirmSummary
 {
-    public sealed class FirmSummaryViewModel : NotifierBase, IDisposable
+    public sealed class FirmSummaryViewModel : SubscriberViewModelBase
     {
-        private readonly IConnectionManager _connectionManager;
-
-        public FirmSummaryViewModel(IConnectionManager connectionManager)
+        public FirmSummaryViewModel(Dispatcher dispatcher, IConnectionManager connectionManager)
+            : base(dispatcher, connectionManager)
         {
-            this._connectionManager = connectionManager;
+            this.ConnectionManager.FirmSummaryChanged += this.ConnectionManager_FirmSummaryChanged;
         }
 
-        public void Dispose()
+        private void ConnectionManager_FirmSummaryChanged(object sender, ChangeEventArgs e)
         {
+            if (this.IsActive)
+            {
+                this.Dispatcher.Invoke(DispatcherPriority.Normal, new Action<IReadOnlyCollection<RowChangeBase>>(this.ProcessChanges), e.RowChanges);
+            }
+        }
+
+        protected override Task<DataTable> SubscribeAsync()
+        {
+            return this.ConnectionManager.SubscribeToFirmSummaryAsync(this.CreateBusyScope());
+        }
+
+        protected override Task UnsubscribeAsync()
+        {
+            return this.ConnectionManager.UnsubscribeFromFirmSummaryAsync(this.CreateBusyScope());
+        }
+
+        public override void Dispose()
+        {
+            this.ConnectionManager.FirmSummaryChanged -= this.ConnectionManager_FirmSummaryChanged;
+            base.Dispose();
         }
     }
 }

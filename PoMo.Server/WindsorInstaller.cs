@@ -13,9 +13,12 @@ namespace PoMo.Server
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
             container
-                .Register(Component.For<IWindowsService>().ImplementedBy<Application>())
-                .Register(Component.For<IDataContext>().ImplementedBy<DataContext>())
-                .Register(Component.For<IServerContract>().ImplementedBy<PortfolioService>())
+                .Register(Component.For<IApplication>().ImplementedBy<Application>())
+                .Register(Component.For<DataContext, IDataContext>().ImplementedBy<DataContext>())
+                .Register(Component.For<IFirmData>().ImplementedBy<FirmData>())
+                .Register(Component.For<IServerContract>().ImplementedBy<DataService>())
+                .Register(Component.For<ITradeFactory>().ImplementedBy<TradeFactory>())
+                .Register(Component.For<IMarketDataProvider>().ImplementedBy<MarketDataProvider>())
                 .Register(Component.For<Binding>().UsingFactoryMethod(BindingFactory.CreateBinding));
         }
     }

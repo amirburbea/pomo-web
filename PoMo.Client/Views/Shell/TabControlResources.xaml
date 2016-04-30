@@ -3,7 +3,7 @@
     xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
     xmlns:shell="clr-namespace:PoMo.Client.Views.Shell"
     xmlns:system="clr-namespace:System;assembly=mscorlib">
-    <Style TargetType="{x:Type TabControl}">
+    <Style TargetType="{x:Type TabControl}" x:Key="AeroTabStyle">
         <Style.Resources>
             <SolidColorBrush x:Key="TabControlNormalBorderBrush" Color="#8C8E94" po:Freeze="True"/>
         </Style.Resources>

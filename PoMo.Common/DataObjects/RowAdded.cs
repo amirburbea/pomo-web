@@ -1,16 +1,24 @@
+using System;
+
 namespace PoMo.Common.DataObjects
 {
+    [Serializable]
     public sealed class RowAdded : RowChangeBase
     {
-        public RowAdded()
-            : base(RowChangeType.Added)
-        {
-        }
+        private object[] _data;
+
+        public override RowChangeType ChangeType => RowChangeType.Added;
 
         public object[] Data
         {
-            get;
-            set;
+            get
+            {
+                return this._data;
+            }
+            set
+            {
+                this._data = value;
+            }
         }
     }
 }

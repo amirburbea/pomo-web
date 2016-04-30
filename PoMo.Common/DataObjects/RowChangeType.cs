@@ -4,6 +4,6 @@ namespace PoMo.Common.DataObjects
     {
         Added = 0,
         Removed = 1,
-        ColumnsChanged = 1
+        ColumnsChanged = 2
     }
 }

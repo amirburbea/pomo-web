@@ -33,7 +33,8 @@ namespace PoMo.Loader
             "RGC", "F", "GM", "DB", "JPM",
             "RBS", "DNKN", "PRU", "GS", "CAT",
             "GRMN", "AAPL", "HNZ", "UPS", "FCAU",
-            "FB", "ALL", "ORCL", "RAD", "HD"
+            "FB", "ALL", "ORCL", "RAD", "HD", "DAL",
+            "CMCSA"
         };
 
         private static int ComparePropertyNames(string left, string right)

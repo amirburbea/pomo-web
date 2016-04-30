@@ -4,11 +4,14 @@ using PoMo.Common.DataObjects;
 
 namespace PoMo.Common.ServiceModel.Contracts
 {
-    [ServiceContract(CallbackContract = typeof(ICallbackContract), Namespace = Namespace.Value, SessionMode = SessionMode.Allowed)]
-    public interface IServerContract : IHeartbeatContract
+    [ServiceContract(CallbackContract = typeof(ICallbackContract), Namespace = ServicesNamespace.Value, SessionMode = SessionMode.Allowed)]
+    public interface IServerContract
     {
         [OperationContract]
         PortfolioModel[] GetPortfolios();
+
+        [OperationContract(IsOneWay = false)]
+        void Heartbeat();
 
         [OperationContract(IsOneWay = false, IsInitiating = true)]
         void RegisterClient();

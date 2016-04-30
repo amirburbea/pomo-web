@@ -5,9 +5,6 @@ namespace PoMo.Data.Models
 {
     public abstract class IdentityObjectBase
     {
-        /// <summary>
-        /// TIDN
-        /// </summary>
         public int Id
         {
             get;

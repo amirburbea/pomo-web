@@ -8,7 +8,7 @@ namespace PoMo.Common
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        protected void OnPropertyChanged(string propertyName = null)
         {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

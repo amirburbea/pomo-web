@@ -7,7 +7,14 @@ using PoMo.Server.Properties;
 
 namespace PoMo.Server
 {
-    public sealed class Application : IWindowsService
+    public interface IApplication
+    {
+        void Start();
+
+        void Stop();
+    }
+
+    public sealed class Application : IApplication
     {
         private readonly Binding _binding;
         private readonly IFactory<IServerContract> _serviceFactory;
@@ -19,7 +26,7 @@ namespace PoMo.Server
             this._binding = binding;
         }
 
-        void IWindowsService.Start()
+        void IApplication.Start()
         {
             this._host = new ServiceHost(this._serviceFactory.Create());
             this._host.AddServiceEndpoint(typeof(IServerContract), this._binding, Settings.Default.WcfUri);
@@ -27,7 +34,7 @@ namespace PoMo.Server
             this._host.Open();
         }
 
-        void IWindowsService.Stop()
+        void IApplication.Stop()
         {
             this._host.Close();
             this._serviceFactory.Release((IServerContract)this._host.SingletonInstance);

@@ -10,7 +10,7 @@ namespace PoMo.Common.ServiceModel
             return new CustomBinding
             {
                 SendTimeout = TimeSpan.FromMinutes(10d),
-                Namespace = Namespace.Value,
+                Namespace = ServicesNamespace.Value,
                 Name = nameof(Binding),
                 Elements =
                 {

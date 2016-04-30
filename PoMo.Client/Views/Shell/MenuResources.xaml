@@ -22,7 +22,7 @@
 			            TextBlock.FontSize="{Binding FontSize, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
                         <Rectangle Name="Bg" Fill="{TemplateBinding MenuItem.Background}" Stroke="{TemplateBinding MenuItem.BorderBrush}" StrokeThickness="1" RadiusX="2" RadiusY="2"/>
                         <Rectangle x:Name="InnerBorder" Margin="1" Stroke="Transparent" StrokeThickness="1" RadiusX="2" RadiusY="2"/>
-                        <Border Padding="0,4">
+                        <Border Padding="0,3">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition MinWidth="24" Width="Auto" SharedSizeGroup="MenuItemIconColumnGroup"/>

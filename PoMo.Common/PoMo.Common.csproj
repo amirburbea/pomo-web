@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BinarySearchMethods.cs" />
     <Compile Include="DataObjects\ColumnChange.cs" />
     <Compile Include="DataObjects\FirmSummaryModel.cs" />
     <Compile Include="DataObjects\PortfolioModel.cs" />
@@ -62,9 +63,8 @@
     <Compile Include="NotifierBase.cs" />
     <Compile Include="ServiceModel\BindingFactory.cs" />
     <Compile Include="ServiceModel\Contracts\ICallbackContract.cs" />
-    <Compile Include="ServiceModel\Contracts\IHeartbeatContract.cs" />
     <Compile Include="ServiceModel\Contracts\IServerContract.cs" />
-    <Compile Include="ServiceModel\Namespace.cs" />
+    <Compile Include="ServiceModel\ServicesNamespace.cs" />
     <Compile Include="ServiceModel\ServiceModelMethods.cs" />
     <Compile Include="Windsor\FactoryMethods.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

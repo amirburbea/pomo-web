@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using Castle.Facilities.TypedFactory;
 using Castle.MicroKernel.Registration;
 using Castle.Windsor;

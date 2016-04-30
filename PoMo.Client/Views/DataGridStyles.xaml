@@ -1,0 +1,42 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:PoMo.Client.Views">
+    <Style TargetType="{x:Type TextBlock}" x:Key="PaddedElementStyle">
+        <Setter Property="Padding" Value="2" />
+    </Style>
+    <Style TargetType="{x:Type TextBlock}" x:Key="RightAlignElementStyle" BasedOn="{StaticResource PaddedElementStyle}">
+        <Setter Property="TextAlignment" Value="Right" />
+    </Style>
+    <Style TargetType="{x:Type TextBlock}" x:Key="RightAlignSignElementStyle" BasedOn="{StaticResource RightAlignElementStyle}">
+        <Style.Resources>
+            <local:DataBoundObjectColumnSignConverter x:Key="SignConverter"/>
+        </Style.Resources>
+        <Style.Triggers>
+            <DataTrigger Value="-1">
+                <DataTrigger.Binding>
+                    <MultiBinding Converter="{StaticResource SignConverter}">
+                        <Binding Path="Column.Binding.Path.Path" RelativeSource="{RelativeSource AncestorType={x:Type DataGridCell}}" />
+                        <Binding />
+                        <!--Text is used to retrigger binding-->
+                        <Binding Path="Text" RelativeSource="{RelativeSource Self}" />
+                    </MultiBinding>
+                </DataTrigger.Binding>
+                <Setter Property="Foreground" Value="DarkRed" />
+            </DataTrigger>
+            <DataTrigger Value="1">
+                <DataTrigger.Binding>
+                    <MultiBinding Converter="{StaticResource SignConverter}">
+                        <Binding Path="Column.Binding.Path.Path" RelativeSource="{RelativeSource AncestorType={x:Type DataGridCell}}" />
+                        <Binding />
+                        <!--Text is used to retrigger binding-->
+                        <Binding Path="Text" RelativeSource="{RelativeSource Self}" />
+                    </MultiBinding>
+                </DataTrigger.Binding>
+                <Setter Property="Foreground" Value="DarkGreen" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}" x:Key="SemiBoldCellStyle">
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+</ResourceDictionary>

@@ -1,21 +1,20 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using PoMo.Common;
+using System.Threading.Tasks;
+using System.Windows.Threading;
 using PoMo.Common.DataObjects;
 
 namespace PoMo.Client.Views.Shell
 {
-    public sealed class ShellViewModel : NotifierBase
+    public sealed class ShellViewModel : ViewModelBase
     {
-        private readonly IConnectionManager _connectionManager;
         private readonly ObservableCollection<PortfolioModel> _portfolios;
         private ConnectionStatus _connectionStatus;
         private bool _isTabControlLocked;
 
-        public ShellViewModel(IConnectionManager connectionManager)
+        public ShellViewModel(Dispatcher dispatcher, IConnectionManager connectionManager)
+            : base(dispatcher, connectionManager)
         {
-            this._connectionManager = connectionManager;
-            this._connectionManager.ConnectionStatusChanged += this.ConnectionManager_ConnectionStatusChanged;
             this.Portfolios = new ReadOnlyObservableCollection<PortfolioModel>(this._portfolios = new ObservableCollection<PortfolioModel>());
         }
 
@@ -48,9 +47,25 @@ namespace PoMo.Client.Views.Shell
             get;
         }
 
-        private void ConnectionManager_ConnectionStatusChanged(object sender, EventArgs e)
+        protected override void OnConnectionStatusChanged()
         {
-            this.ConnectionStatus = ((IConnectionManager)sender).ConnectionStatus;
+            switch (this.ConnectionStatus = this.ConnectionManager.ConnectionStatus)
+            {
+                case ConnectionStatus.Connected:
+                    if (this.Portfolios.Count == 0)
+                    {
+                        this.ConnectionManager.GetPortfoliosAsync(this.CreateBusyScope())
+                            .ContinueWith(
+                                task => this.Dispatcher.Invoke(
+                                    DispatcherPriority.Normal,
+                                    new Action<PortfolioModel[]>(models => Array.ForEach(models, this._portfolios.Add)),
+                                    task.Result
+                                ),
+                                TaskContinuationOptions.NotOnFaulted
+                            );
+                    }
+                    break;
+            }
         }
     }
 }

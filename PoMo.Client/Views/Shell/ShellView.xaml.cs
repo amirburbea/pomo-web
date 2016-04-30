@@ -69,7 +69,6 @@ namespace PoMo.Client.Views.Shell
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            //PropertyChangedEventManager.RemoveHandler(this.ViewModel, this.ViewModel_ConnectionStatusChanged, nameof(ShellViewModel.ConnectionStatus));
             if (Application.Current.MainWindow.Equals(this))
             {
                 ShellView other = Application.Current.Windows.OfType<ShellView>().FirstOrDefault(view => !view.Equals(this));
@@ -150,6 +149,7 @@ namespace PoMo.Client.Views.Shell
         private void CloseTab(int index)
         {
             TabItem item = (TabItem)this.TabControl.Items[index];
+            ((SubscriberViewModelBase)item.DataContext).IsActive = false;
             this.TabControl.Items.RemoveAt(index);
             PositionsViewModel positionsViewModel = item.DataContext as PositionsViewModel;
             if (positionsViewModel != null)
@@ -195,22 +195,21 @@ namespace PoMo.Client.Views.Shell
             {
                 this.CreateFirmSummaryTab();
             }
-            //PropertyChangedEventManager.AddHandler(this.ViewModel, this.ViewModel_ConnectionStatusChanged, nameof(ShellViewModel.ConnectionStatus));
         }
 
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (this._ignoreSelectionChangedCounter != 0 || this.ViewModel.ConnectionStatus != ConnectionStatus.Connected)
+            if (this._ignoreSelectionChangedCounter != 0 || !this.TabControl.Equals(e.OriginalSource))
             {
                 return;
             }
-            if (e.RemovedItems.Count != 0)
+            foreach (TabItem tabItem in e.RemovedItems.Cast<TabItem>())
             {
-                
+                ((SubscriberViewModelBase)tabItem.DataContext).IsActive = false;
             }
-            if (e.AddedItems.Count != 0)
+            foreach (TabItem tabItem in e.AddedItems.Cast<TabItem>())
             {
-
+                ((SubscriberViewModelBase)tabItem.DataContext).IsActive = true;
             }
         }
 
@@ -233,6 +232,11 @@ namespace PoMo.Client.Views.Shell
                 }
                 Interlocked.Decrement(ref this._shellView._ignoreSelectionChangedCounter);
                 this._isDisposed = true;
+                for (int index = 0; index < this._shellView.TabControl.Items.Count; index++)
+                {
+                    SubscriberViewModelBase viewModel = (SubscriberViewModelBase)((TabItem)this._shellView.TabControl.Items[index]).DataContext;
+                    viewModel.IsActive = index == this._shellView.TabControl.SelectedIndex;
+                }
             }
         }
     }

@@ -1,21 +1,27 @@
-﻿namespace PoMo.Common.DataObjects
+﻿using System;
+
+namespace PoMo.Common.DataObjects
 {
+    [Serializable]
     public abstract class RowChangeBase
     {
-        protected RowChangeBase(RowChangeType changeType)
-        {
-            this.ChangeType = changeType;
-        }
+        private object _rowKey;
 
-        public RowChangeType ChangeType
+        public abstract RowChangeType ChangeType
         {
             get;
         }
 
         public object RowKey
         {
-            get;
-            set;
+            get
+            {
+                return this._rowKey;
+            }
+            set
+            {
+                this._rowKey = value;
+            }
         }
     }
 }

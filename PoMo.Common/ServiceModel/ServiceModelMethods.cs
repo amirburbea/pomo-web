@@ -6,27 +6,23 @@ namespace PoMo.Common.ServiceModel
 {
     public static class ServiceModelMethods
     {
-        public static void TryDispose(object obj)
+        public static void TryClose(object obj)
         {
-            if (obj == null)
-            {
-                return;
-            }
             try
             {
-                ICommunicationObject communicationObject;
-                if ((communicationObject = obj as ICommunicationObject) != null &&
-                    (communicationObject.State == CommunicationState.Faulted || communicationObject.State == CommunicationState.Closed))
+                ICommunicationObject communicationObject = obj as ICommunicationObject;
+                if (communicationObject == null)
                 {
                     return;
                 }
-                IDisposable disposable = obj as IDisposable;
-                if (disposable != null)
+                switch (communicationObject.State)
                 {
-                    disposable.Dispose();
-                    return;
+                    case CommunicationState.Faulted:
+                    case CommunicationState.Closed:
+                    case CommunicationState.Closing:
+                        return;
                 }
-                communicationObject?.Close();
+                communicationObject.Close();
             }
             catch (Exception e)
             {

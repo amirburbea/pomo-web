@@ -76,6 +76,7 @@
     <Compile Include="Controls\ControlMethods.cs" />
     <Compile Include="Controls\ITabTearOffHandler.cs" />
     <Compile Include="Converters\ObjectIsNullConverter.cs" />
+    <Compile Include="ReadOnlyDataRowCollectionWrapper.cs" />
     <Compile Include="PortfolioChangeEventArgs.cs" />
     <Compile Include="ChangeEventArgs.cs" />
     <Compile Include="Views\FirmSummary\FirmSummaryView.xaml.cs">
@@ -83,7 +84,8 @@
     </Compile>
     <Compile Include="Views\FirmSummary\FirmSummaryViewModel.cs" />
     <Compile Include="Views\FirmSummary\WindsorInstaller.cs" />
-    <Compile Include="Views\Shell\ConnectionStatusControl.cs" />
+    <Compile Include="Views\NumericSignConverter.cs" />
+    <Compile Include="Views\DataBoundObjectColumnSignConverter.cs" />
     <Compile Include="Views\SubscriberViewModelBase.cs" />
     <Compile Include="Views\Positions\PositionsView.xaml.cs">
       <DependentUpon>PositionsView.xaml</DependentUpon>
@@ -94,11 +96,12 @@
     <Compile Include="Views\Shell\ShellViewTearOffHandler.cs" />
     <Compile Include="Controls\TabTearOffBehavior.cs" />
     <Compile Include="Controls\VisualTreeMethods.cs" />
+    <Compile Include="Views\ViewModelBase.cs" />
     <Compile Include="Views\WindsorInstaller.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Views\Shell\WindsorInstaller.cs" />
     <Compile Include="WindsorInstaller.cs" />
-    <Page Include="Themes\Generic.xaml">
+    <Page Include="Views\DataGridStyles.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

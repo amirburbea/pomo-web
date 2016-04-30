@@ -1,5 +1,6 @@
 ﻿using System.ServiceModel.Channels;
 using System.Windows;
+using System.Windows.Threading;
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
@@ -14,7 +15,8 @@ namespace PoMo.Client
             container
                 .Register(Component.For<Binding>().UsingFactoryMethod(BindingFactory.CreateBinding))
                 .Register(Component.For<IConnectionManager>().ImplementedBy<ConnectionManager>())
-                .Register(Component.For<Application>().ImplementedBy<App>().OnCreate(app => ((App)app).InitializeComponent()));
+                .Register(Component.For<Application>().ImplementedBy<App>().OnCreate(app => ((App)app).InitializeComponent()))
+                .Register(Component.For<Dispatcher>().UsingFactory((Application app) => app.Dispatcher));
         }
     }
 }

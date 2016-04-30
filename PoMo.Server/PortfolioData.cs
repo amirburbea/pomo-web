@@ -1,137 +1,264 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
+using System.Data.Entity;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using PoMo.Common;
+using PoMo.Common.DataObjects;
 using PoMo.Data;
 using PoMo.Data.Models;
 
 namespace PoMo.Server
 {
-    public interface IPortfolioData
+    public interface IPortfolioData : ISubscribable
     {
-    }
+        event EventHandler<DataEventArgs<RowChangeBase[]>> DataChanged;
 
-    public sealed class Position : NotifierBase
-    {
-        private readonly Security _security;
-        private decimal _costBasis;
-        private int _quantity;
-
-        public Position(Security security)
+        string PortfolioId
         {
-            this._security = security;
+            get;
         }
 
-        [Display(Name = "Cost Basis", Order = 3)]
-        public decimal CostBasis
+        string PortfolioName
         {
-            get
-            {
-                return this._costBasis;
-            }
-            set
-            {
-                this.SetValue(ref this._costBasis, value);
-            }
+            get;
         }
 
-        [Display(Order = 1)]
-        public string Description => this._security.Description;
-
-        [Display(Order = 2)]
-        public int Quantity
-        {
-            get
-            {
-                return this._quantity;
-            }
-            set
-            {
-                this.SetValue(ref this._quantity, value);
-            }
-        }
-
-        [Display(Order = 0)]
-        public string Ticker => this._security.Ticker;
+        DataTable GetData();
     }
 
     internal sealed class PortfolioData : IPortfolioData
     {
-        private readonly PortfolioDatum[] _data;
+        private static readonly DataTable _dataSchemaTable = PortfolioData.CreateDataSchemaTable();
 
-        public PortfolioData(IDataContext dataContext)
-        {
-            this._data = dataContext.Portfolios.AsEnumerable().Select(portfolio => new PortfolioDatum(portfolio, dataContext)).ToArray();
-        }
-    }
-
-    internal sealed class PortfolioDatum
-    {
-        private static readonly DataTable _dataSchemaTable = PortfolioDatum.CreateDataSchemaTable();
-        private static readonly Func<Position, object[]> _rowProjection = PortfolioDatum.CreateRowProjection();
+        private static readonly string[] _propertyNames = typeof(Position).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(property => property.GetMethod.GetParameters().Length == 0)
+            .Select(property => property.Name)
+            .ToArray();
 
         private readonly DataTable _dataTable;
         private readonly Portfolio _portfolio;
+        private readonly List<Position> _positions;
+        private readonly HashSet<string> _subscribers;
 
-        public PortfolioDatum(Portfolio portfolio, IDataContext dataContext)
+        public PortfolioData(Portfolio portfolio, IDataContext dataContext)
         {
             this._portfolio = portfolio;
-            this._dataTable = PortfolioDatum._dataSchemaTable.Clone();
+            this._dataTable = PortfolioData._dataSchemaTable.Clone();
+            this._dataTable.TableName = portfolio.Id;
+            this._subscribers = new HashSet<string>();
+            this._positions = new List<Position>();
+            IOrderedQueryable<IGrouping<Security, Trade>> groups = dataContext.Trades
+                .Where(trade => trade.PortfolioId == portfolio.Id)
+                .Include(trade => trade.Security)
+                .GroupBy(trade => trade.Security)
+                .OrderBy(group => group.Key.Ticker);
+            foreach (IGrouping<Security, Trade> group in groups)
+            {
+                Position position = new Position { Ticker = group.Key.Ticker, Description = group.Key.Description };
+                foreach (Trade trade in group.OrderBy(trade => trade.TradeDate))
+                {
+                    PortfolioData.ProcessTrade(position, trade.Quantity, trade.Price);
+                }
+                this._positions.Add(position);
+                this._dataTable.Rows.Add(this.CreateRow(position));
+            }
         }
 
+        public event EventHandler<DataEventArgs<RowChangeBase[]>> DataChanged;
+
         public string PortfolioId => this._portfolio.Id;
+
+        public string PortfolioName => this._portfolio.Name;
+
+        public DataTable GetData()
+        {
+            lock (this)
+            {
+                return this._dataTable.FullClone();
+            }
+        }
+
+        string[] ISubscribable.GetSubscribers()
+        {
+            lock (this._subscribers)
+            {
+                return this._subscribers.Count == 0 ? (string[])Enumerable.Empty<string>() : this._subscribers.ToArray();
+            }
+        }
+
+        bool ISubscribable.Subscribe(string subscriberId, out int subscriberCount)
+        {
+            lock (this._subscribers)
+            {
+                bool added = this._subscribers.Add(subscriberId);
+                subscriberCount = this._subscribers.Count;
+                return added;
+            }
+        }
+
+        bool ISubscribable.Unsubscribe(string subscriberId, out int subscriberCount)
+        {
+            lock (this._subscribers)
+            {
+                bool removed = this._subscribers.Remove(subscriberId);
+                subscriberCount = this._subscribers.Count;
+                return removed;
+            }
+        }
+
+        public void ProcessPriceChanges(IEnumerable<PriceChange> priceChanges)
+        {
+            PositionChangeProcessor changeProcessor = new PositionChangeProcessor(this._dataTable);
+            lock (this)
+            {
+                foreach (PriceChange priceChange in priceChanges)
+                {
+                    int index = this._positions.BinarySearchByValue(priceChange.Ticker, pos => pos.Ticker);
+                    if (index < 0)
+                    {
+                        continue;
+                    }
+                    Position position = this._positions[index];
+                    position.PropertyChanged += changeProcessor.PropertyChangedEventHandler;
+                    PortfolioData.CalculatePosition(position, priceChange.Price);
+                    position.PropertyChanged -= changeProcessor.PropertyChangedEventHandler;
+                }
+                if (changeProcessor.RowChanges.Count == 0)
+                {
+                    return;
+                }
+                this._dataTable.AcceptChanges();
+            }
+            this.OnDataChanged(changeProcessor.RowChanges);
+        }
+
+        public void ProcessTrades(IEnumerable<Trade> trades)
+        {
+            List<RowChangeBase> list = new List<RowChangeBase>();
+            PositionChangeProcessor changeProcessor = new PositionChangeProcessor(this._dataTable);
+            lock (this)
+            {
+                foreach (Trade trade in trades)
+                {
+                    int index = this._positions.BinarySearchByValue(trade.Security.Ticker, pos => pos.Ticker);
+                    if (index < 0)
+                    {
+                        Position position = new Position { Ticker = trade.Security.Ticker, Description = trade.Security.Description };
+                        PortfolioData.ProcessTrade(position, trade.Quantity, trade.Price);
+                        this._positions.Insert(~index, position);
+                        DataRow dataRow = this.CreateRow(position);
+                        this._dataTable.Rows.InsertAt(dataRow, ~index);
+                        list.Add(new RowAdded { RowKey = position.Ticker, Data = dataRow.ItemArray });
+                    }
+                    else
+                    {
+                        Position position = this._positions[index];
+                        position.PropertyChanged += changeProcessor.PropertyChangedEventHandler;
+                        PortfolioData.ProcessTrade(position, trade.Quantity, trade.Price);
+                        position.PropertyChanged -= changeProcessor.PropertyChangedEventHandler;
+                    }
+                }
+            }
+            this.OnDataChanged(list.Count == 0 ? changeProcessor.RowChanges : list.Concat(changeProcessor.RowChanges));
+        }
+
+        private static void CalculatePosition(Position position, decimal price)
+        {
+            position.LastPrice = price;
+            position.MarkToMarket = position.Quantity * price;
+            position.Pnl = position.MarkToMarket - position.CostBasis + position.Cash;
+        }
 
         private static DataTable CreateDataSchemaTable()
         {
             DataTable dataTable = new DataTable();
-            foreach (DataColumn dataColumn in
-                from property in typeof(Position).GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                let displayAttribute = property.GetCustomAttribute<DisplayAttribute>()
-                let caption = displayAttribute?.GetName() ?? property.Name
-                orderby displayAttribute?.GetOrder() ?? int.MaxValue, caption
-                select new DataColumn(property.Name, Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType)
-                {
-                    Caption = caption,
-                    ExtendedProperties =
-                    {
-                        { nameof(DisplayFormatAttribute.DataFormatString), property.GetCustomAttribute<DisplayFormatAttribute>()?.DataFormatString }
-                    }
-                })
+            foreach (PropertyInfo property in typeof(Position).GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(property => property.GetMethod.GetParameters().Length == 0))
             {
-                dataTable.Columns.Add(dataColumn);
+                dataTable.Columns.Add(new DataColumn(property.Name, Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType));
             }
+            dataTable.PrimaryKey = new[] { dataTable.Columns[nameof(Position.Ticker)] };
             return dataTable;
         }
 
-        private static Func<Position, object[]> CreateRowProjection()
+        private static void ProcessTrade(Position position, int quantity, decimal price)
         {
-            ParameterExpression position = Expression.Parameter(typeof(Position));
-            Expression<Func<Position, object[]>> lambda = Expression.Lambda<Func<Position, object[]>>(
-                Expression.NewArrayInit(
-                    typeof(object),
-                    PortfolioDatum._dataSchemaTable.Columns.Cast<DataColumn>().Select(
-                        column => Expression.Coalesce(
-                            Expression.Convert(
-                                Expression.Property(
-                                    position,
-                                    typeof(Position).GetProperty(column.ColumnName, BindingFlags.Public | BindingFlags.Instance)
-                                ),
-                                typeof(object)
-                            ),
-                            Expression.Field(
-                                null,
-                                typeof(Convert),
-                                nameof(Convert.DBNull)
-                            )
-                        )
-                    )
-                ),
-                position
-            );
-            return lambda.Compile();
+            if (quantity == 0)
+            {
+                return;
+            }
+            position.Quantity += quantity;
+            decimal tradeValue = quantity * price;
+            if (tradeValue < 0)
+            {
+                position.Cash -= tradeValue;
+            }
+            else
+            {
+                position.CostBasis += tradeValue;
+            }
+            PortfolioData.CalculatePosition(position, price);
+        }
+
+        private DataRow CreateRow(Position position)
+        {
+            DataRow dataRow = this._dataTable.NewRow();
+            foreach (string propertyName in PortfolioData._propertyNames)
+            {
+                dataRow[propertyName] = position[propertyName];
+            }
+            return dataRow;
+        }
+
+        private void OnDataChanged(IEnumerable<RowChangeBase> changes)
+        {
+            this.DataChanged?.Invoke(this, DataEventArgs.Create(changes as RowChangeBase[] ?? changes.ToArray()));
+        }
+
+        private sealed class PositionChangeProcessor
+        {
+            private readonly DataTable _dataTable;
+            private readonly List<RowColumnsChanged> _rowChanges = new List<RowColumnsChanged>();
+
+            public PositionChangeProcessor(DataTable dataTable)
+            {
+                this._dataTable = dataTable;
+                this.PropertyChangedEventHandler = this.Position_PropertyChanged;
+            }
+
+            public PropertyChangedEventHandler PropertyChangedEventHandler
+            {
+                get;
+            }
+
+            public IReadOnlyCollection<RowColumnsChanged> RowChanges => this._rowChanges;
+
+            private void Position_PropertyChanged(object sender, PropertyChangedEventArgs e)
+            {
+                Position position = (Position)sender;
+                DataRow dataRow = this._dataTable.Rows.Find(position.Ticker);
+                object newValue = dataRow[e.PropertyName] = position[e.PropertyName] ?? DBNull.Value;
+                int index = this._rowChanges.BinarySearchByValue(position.Ticker, change => (string)change.RowKey);
+                RowColumnsChanged rowChange;
+                if (index < 0)
+                {
+                    this._rowChanges.Insert(~index, rowChange = new RowColumnsChanged { RowKey = position.Ticker });
+                }
+                else
+                {
+                    rowChange = this._rowChanges[index];
+                }
+                if ((index = rowChange.ColumnChanges.BinarySearchByValue(e.PropertyName, columnChange => columnChange.ColumnName)) < 0)
+                {
+                    rowChange.ColumnChanges.Insert(~index, new ColumnChange { ColumnName = e.PropertyName, Value = newValue });
+                }
+                else
+                {
+                    rowChange.ColumnChanges[index].Value = newValue;
+                }
+            }
         }
     }
 }

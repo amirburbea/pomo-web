@@ -45,7 +45,10 @@ namespace PoMo.Client.DataBoundObjects
 
         private sealed class DataBoundTypeDescriptionProvider : TypeDescriptionProvider
         {
-            public override ICustomTypeDescriptor GetTypeDescriptor(Type objectType, object instance) => ((DataBoundObject)instance)._collection.CustomTypeDescriptor;
+            public override ICustomTypeDescriptor GetTypeDescriptor(Type objectType, object instance)
+            {
+                return instance == null ? base.GetTypeDescriptor(objectType, null) : ((DataBoundObject)instance)._collection.CustomTypeDescriptor;
+            }
         }
     }
 }

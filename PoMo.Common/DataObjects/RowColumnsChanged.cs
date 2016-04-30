@@ -1,18 +1,16 @@
-using System.Collections.Generic;
+using System;
+using System.Collections.ObjectModel;
 
 namespace PoMo.Common.DataObjects
 {
+    [Serializable]
     public sealed class RowColumnsChanged : RowChangeBase
     {
-        public RowColumnsChanged()
-            : base(RowChangeType.ColumnsChanged)
-        {
-            this.ColumnChanges = new List<ColumnChange>();
-        }
+        public override RowChangeType ChangeType => RowChangeType.ColumnsChanged;
 
-        public IList<ColumnChange> ColumnChanges
+        public Collection<ColumnChange> ColumnChanges
         {
             get;
-        }
+        } = new Collection<ColumnChange>();
     }
 }

@@ -64,15 +64,18 @@ namespace PoMo.Client.Views.Shell
 
         void ITabTearOffHandler.HandleTargetedDrop(object item, TabControl sourceTabControl, int sourceIndex, TabControl targetTabControl, int insertionIndex)
         {
-            sourceTabControl.Items.RemoveAt(sourceIndex);
-            targetTabControl.Items.Insert(insertionIndex, item);
-            targetTabControl.SelectedIndex = insertionIndex;
-            if (sourceTabControl.Items.Count != 0)
+            ShellView sourceWindow = Window.GetWindow(sourceTabControl) as ShellView;
+            if (sourceWindow == null)
             {
                 return;
             }
-            ShellView sourceWindow = Window.GetWindow(sourceTabControl) as ShellView;
-            if (sourceWindow == null)
+            using (sourceWindow.CreateIgnoreSelectionChangedScope())
+            {
+                sourceTabControl.Items.RemoveAt(sourceIndex);
+            }
+            targetTabControl.Items.Insert(insertionIndex, item);
+            targetTabControl.SelectedIndex = insertionIndex;
+            if (sourceTabControl.Items.Count != 0)
             {
                 return;
             }
@@ -96,13 +99,16 @@ namespace PoMo.Client.Views.Shell
             else
             {
                 ShellView targetWindow = this._shellViewFactory.Create();
-                targetWindow.Left = dropLocation.X;
-                targetWindow.Top = dropLocation.Y;
-                targetWindow.Height = sourceWindow.WindowState == WindowState.Normal ? sourceWindow.ActualHeight : sourceWindow.RestoreBounds.Height;
-                targetWindow.Width = sourceWindow.WindowState == WindowState.Normal ? sourceWindow.ActualWidth : sourceWindow.RestoreBounds.Width;
-                sourceTabControl.Items.RemoveAt(sourceIndex);
-                targetWindow.Show();
-                targetWindow.Activate();
+                using (sourceWindow.CreateIgnoreSelectionChangedScope())
+                {
+                    targetWindow.Left = dropLocation.X;
+                    targetWindow.Top = dropLocation.Y;
+                    targetWindow.Height = sourceWindow.WindowState == WindowState.Normal ? sourceWindow.ActualHeight : sourceWindow.RestoreBounds.Height;
+                    targetWindow.Width = sourceWindow.WindowState == WindowState.Normal ? sourceWindow.ActualWidth : sourceWindow.RestoreBounds.Width;
+                    sourceTabControl.Items.RemoveAt(sourceIndex);
+                    targetWindow.Show();
+                    targetWindow.Activate();
+                }
                 targetWindow.TabControl.SelectedIndex = targetWindow.TabControl.Items.Add(item);
             }
         }
