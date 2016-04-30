@@ -1,7 +1,6 @@
 using System;
 using System.Globalization;
 using System.Windows.Data;
-using PoMo.Client.DataBoundObjects;
 
 namespace PoMo.Client.Views
 {

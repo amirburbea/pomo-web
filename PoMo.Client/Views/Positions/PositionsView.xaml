@@ -7,6 +7,9 @@
     xmlns:local="clr-namespace:PoMo.Client.Views.Positions"
     mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300"
     d:DataContext="{d:DesignInstance local:PositionsViewModel}">
+    <UserControl.Resources>
+        <views:NumericSignConverter x:Key="NumericSignConverter" />
+    </UserControl.Resources>
     <views:DataContentControl>
         <views:DataContentControl.Style>
             <Style TargetType="{x:Type views:DataContentControl}">
@@ -18,6 +21,9 @@
                         </MultiDataTrigger.Conditions>
                         <Setter Property="IsWaiting" Value="True" />
                     </MultiDataTrigger>
+                    <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                        <Setter Property="Cursor" Value="Wait" />
+                    </DataTrigger>
                 </Style.Triggers>
             </Style>
         </views:DataContentControl.Style>
@@ -28,14 +34,11 @@
                     <Run Text="{Binding Pnl, Mode=OneWay, StringFormat='{}{0:#,##0;(#,##0)}'}" FontWeight="SemiBold">
                         <Run.Style>
                             <Style TargetType="{x:Type Run}">
-                                <Style.Resources>
-                                    <views:NumericSignConverter x:Key="SignConverter" />
-                                </Style.Resources>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Pnl, Converter={StaticResource SignConverter}}" Value="-1">
+                                    <DataTrigger Binding="{Binding Pnl, Converter={StaticResource NumericSignConverter}}" Value="-1">
                                         <Setter Property="Foreground" Value="DarkRed" />
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding Pnl, Converter={StaticResource SignConverter}}" Value="1">
+                                    <DataTrigger Binding="{Binding Pnl, Converter={StaticResource NumericSignConverter}}" Value="1">
                                         <Setter Property="Foreground" Value="DarkGreen" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -51,15 +54,46 @@
                     <ResourceDictionary Source="/Views/DataGridStyles.xaml" />
                 </DataGrid.Resources>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Ticker" Binding="{Binding Ticker}" CellStyle="{StaticResource SemiBoldCellStyle}" ElementStyle="{StaticResource PaddedElementStyle}" />
+                    <DataGridTextColumn Header="Ticker" Binding="{Binding Ticker}">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource PaddedElementStyle}">
+                                <Setter Property="TextAlignment" Value="Center" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="Description" Binding="{Binding Description}" ElementStyle="{StaticResource PaddedElementStyle}" />
-                    <DataGridTextColumn Header="Direction" Binding="{Binding Direction}" ElementStyle="{StaticResource PaddedElementStyle}" />
+                    <DataGridTemplateColumn Header="Direction">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource PaddedElementStyle}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Quantity, Converter={StaticResource NumericSignConverter}}" Value="-1">
+                                                    <Setter Property="Text" Value="Short" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                            <Setter Property="Text" Value="Long" />
+                                            <Setter Property="TextAlignment" Value="Center" />
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                     <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity, StringFormat='{}{0:#,##0}'}" ElementStyle="{StaticResource RightAlignElementStyle}" />
                     <DataGridTextColumn Header="Px Last" Binding="{Binding LastPrice, StringFormat='{}{0:#,##0.####}'}" ElementStyle="{StaticResource RightAlignElementStyle}" />
                     <DataGridTextColumn Header="MTM" Binding="{Binding MarkToMarket, StringFormat='{}{0:#,##0.00;(#,##0.00)}'}" ElementStyle="{StaticResource RightAlignSignElementStyle}" />
                     <DataGridTextColumn Header="Cost Basis" Binding="{Binding CostBasis, StringFormat='{}{0:#,##0}'}" ElementStyle="{StaticResource RightAlignElementStyle}" />
                     <DataGridTextColumn Header="Cash" Binding="{Binding Cash, StringFormat='{}{0:#,##0}'}" ElementStyle="{StaticResource RightAlignElementStyle}" />
-                    <DataGridTextColumn Header="Pnl" Binding="{Binding Pnl, StringFormat='{}{0:#,##0;(#,##0)}'}" CellStyle="{StaticResource SemiBoldCellStyle}" ElementStyle="{StaticResource RightAlignSignElementStyle}" />
+                    <DataGridTextColumn Header="Pnl" Binding="{Binding Pnl, StringFormat='{}{0:#,##0;(#,##0)}'}">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource RightAlignSignElementStyle}">
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </DockPanel>

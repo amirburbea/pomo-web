@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
-using PoMo.Client.DataBoundObjects;
 using PoMo.Common;
 using PoMo.Common.DataObjects;
 
@@ -133,7 +130,7 @@ namespace PoMo.Client.Views
                             if (columnChange.ColumnName == "Pnl")
                             {
                                 // Delta in Pnl
-                                pnl += ((decimal)columnChange.Value - rowPnl);
+                                pnl += (decimal)columnChange.Value - rowPnl;
                             }
                             dataRow[columnChange.ColumnName] = columnChange.Value;
                         }

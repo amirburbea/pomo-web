@@ -42,8 +42,6 @@ namespace PoMo.Server
             set;
         }
 
-        public char Direction => Position.GetDirection(this.Quantity);
-
         public decimal LastPrice
         {
             get
@@ -88,10 +86,6 @@ namespace PoMo.Server
             }
             set
             {
-                if (Position.GetDirection(value) != this.Direction)
-                {
-                    this.OnPropertyChanged(nameof(this.Direction));
-                }
                 this.SetValue(ref this._quantity, value);
             }
         }
@@ -114,8 +108,6 @@ namespace PoMo.Server
                         return this.CostBasis;
                     case nameof(this.Description):
                         return this.Description;
-                    case nameof(this.Direction):
-                        return this.Direction;
                     case nameof(this.Pnl):
                         return this.Pnl;
                     case nameof(this.MarkToMarket):
@@ -129,11 +121,6 @@ namespace PoMo.Server
                 }
                 throw new ArgumentException($"Property {propertyName} not handled.", nameof(propertyName));
             }
-        }
-
-        public static char GetDirection(int quantity)
-        {
-            return quantity > 0 ? 'L' : 'S';
         }
     }
 }

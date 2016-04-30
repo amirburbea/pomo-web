@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
 using PoMo.Common;
 
-namespace PoMo.Client.DataBoundObjects
+namespace PoMo.Client.Views
 {
     public sealed class DataBoundObjectCollection : List<DataBoundObject>, IBindingList, IRaiseItemChangedEvents, ITypedList, IDisposable
     {

@@ -21,6 +21,9 @@
                         </MultiDataTrigger.Conditions>
                         <Setter Property="IsWaiting" Value="True" />
                     </MultiDataTrigger>
+                    <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                        <Setter Property="Cursor" Value="Wait" />
+                    </DataTrigger>
                 </Style.Triggers>
             </Style>
         </views:DataContentControl.Style>
@@ -51,9 +54,22 @@
                     <ResourceDictionary Source="/Views/DataGridStyles.xaml" />
                 </DataGrid.Resources>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Code" Binding="{Binding PortfolioId}" CellStyle="{StaticResource SemiBoldCellStyle}" ElementStyle="{StaticResource PaddedElementStyle}" />
+                    <DataGridTextColumn Header="Code" Binding="{Binding PortfolioId}">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource PaddedElementStyle}">
+                                <Setter Property="TextAlignment" Value="Center" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="Name" Binding="{Binding PortfolioName}" ElementStyle="{StaticResource PaddedElementStyle}" />
-                    <DataGridTextColumn Header="Pnl" Binding="{Binding Pnl, StringFormat='{}{0:#,##0;(#,##0)}'}" CellStyle="{StaticResource SemiBoldCellStyle}" ElementStyle="{StaticResource RightAlignSignElementStyle}" />
+                    <DataGridTextColumn Header="Pnl" Binding="{Binding Pnl, StringFormat='{}{0:#,##0;(#,##0)}'}">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource RightAlignSignElementStyle}">
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </DockPanel>

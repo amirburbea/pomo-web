@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace PoMo.Client.DataBoundObjects
+namespace PoMo.Client.Views
 {
     [TypeDescriptionProvider(typeof(DataBoundTypeDescriptionProvider))]
     public sealed class DataBoundObject : INotifyPropertyChanged

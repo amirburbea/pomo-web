@@ -138,8 +138,7 @@ namespace PoMo.Loader
 
         private static void Main()
         {
-            string uri = "http://www.google.com/finance/info?infotype=infoquoteall&q=" + string.Join(",", Program._tickers);
-            HttpWebRequest request = WebRequest.CreateHttp(uri);
+            string uri = "http://www.google.com/finance/info?infotype=infoquoteall&q=" + string.Join(",", Program._tickers);HttpWebRequest request = WebRequest.CreateHttp(uri);
             string text;
             using (WebResponse response = request.GetResponse())
             {

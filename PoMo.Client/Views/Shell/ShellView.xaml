@@ -18,7 +18,7 @@
                 <ResourceDictionary Source="StatusBarResources.xaml" />
                 <ResourceDictionary Source="TabControlResources.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <Style TargetType="{x:Type TextBlock}" x:Key="TabItemHeaderTextBlockStyle">
+            <Style TargetType="{x:Type TextBlock}" x:Key="HeaderTextBlockStyle">
                 <Style.Resources>
                     <converters:ObjectIsNullConverter x:Key="ObjectIsNullConverter" />
                 </Style.Resources>
@@ -36,7 +36,7 @@
             </Style>
             <DataTemplate DataType="{x:Type do:PortfolioModel}">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Style="{StaticResource TabItemHeaderTextBlockStyle}">
+                    <TextBlock Style="{StaticResource HeaderTextBlockStyle}">
                         <Run Text="{Binding Id, Mode=OneTime}" FontWeight="SemiBold" />
                         <Run Text="-" />
                         <Run Text="{Binding Name, Mode=OneTime}" />
@@ -45,7 +45,7 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type do:FirmSummaryModel}">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Firm Summary" Style="{StaticResource TabItemHeaderTextBlockStyle}" FontWeight="SemiBold" />
+                    <TextBlock Text="Firm Summary" Style="{StaticResource HeaderTextBlockStyle}" FontWeight="SemiBold" />
                 </StackPanel>
             </DataTemplate>
         </ResourceDictionary>
