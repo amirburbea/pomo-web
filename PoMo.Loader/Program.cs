@@ -19,7 +19,7 @@ namespace PoMo.Loader
         private static readonly Portfolio[] _portfolios =
         {
             new Portfolio { Id = "BC", Name = "Blue Chips" },
-            new Portfolio { Id = "CP", Name = "CP" },
+            new Portfolio { Id = "CX", Name = "Corp EX" },
             new Portfolio { Id = "HEDGE", Name = "Hedges" },
             new Portfolio { Id = "PORTACT", Name = "Port Accounts" },
             new Portfolio { Id = "SPEC", Name = "Special Sits" }
@@ -34,7 +34,7 @@ namespace PoMo.Loader
             "RBS", "DNKN", "PRU", "GS", "CAT",
             "GRMN", "AAPL", "HNZ", "UPS", "FCAU",
             "FB", "ALL", "ORCL", "RAD", "HD", "DAL",
-            "CMCSA"
+            "CMCSA", "NYT"
         };
 
         private static int ComparePropertyNames(string left, string right)

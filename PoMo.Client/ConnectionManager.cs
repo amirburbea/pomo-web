@@ -8,13 +8,20 @@ using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.Threading;
 using System.Threading.Tasks;
-using PoMo.Client.Properties;
 using PoMo.Common.DataObjects;
 using PoMo.Common.ServiceModel;
 using PoMo.Common.ServiceModel.Contracts;
 
 namespace PoMo.Client
 {
+    public interface IWcfSettings
+    {
+        string WcfUri
+        {
+            get;
+        }
+    }
+
     public interface IConnectionManager
     {
         event EventHandler ConnectionStatusChanged;
@@ -51,14 +58,14 @@ namespace PoMo.Client
         private IServerContract _channel;
         private bool _isDisposed;
 
-        public ConnectionManager(Binding binding)
+        public ConnectionManager(Binding binding, IWcfSettings wcfSettings)
         {
             this._factory = new DuplexChannelFactory<IServerContract>(
                 new InstanceContext(new Callback(this)),
                 new ServiceEndpoint(
                     ContractDescription.GetContract(typeof(IServerContract)),
                     binding,
-                    new EndpointAddress(Settings.Default.WcfUri)
+                    new EndpointAddress(wcfSettings.WcfUri)
                 )
             );
             this._resetEvent = new AutoResetEvent(true);
