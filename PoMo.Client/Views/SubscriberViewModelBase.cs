@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using PoMo.Client.DataBoundObjects;
@@ -50,6 +51,8 @@ namespace PoMo.Client.Views
                 this._isActive = value;
                 if (this.ConnectionManager.ConnectionStatus != ConnectionStatus.Connected)
                 {
+                    this._dataTable = null;
+                    this.Data = null;
                     return;
                 }
                 if (value)
@@ -86,7 +89,12 @@ namespace PoMo.Client.Views
         protected sealed override void OnConnectionStatusChanged()
         {
             base.OnConnectionStatusChanged();
-            if (this.IsActive && this.ConnectionManager.ConnectionStatus == ConnectionStatus.Connected)
+            if (!this.IsActive || this.ConnectionManager.ConnectionStatus != ConnectionStatus.Connected)
+            {
+                this._dataTable = null;
+                this.Data = null;
+            }
+            else
             {
                 this.GetData();
             }
@@ -142,10 +150,13 @@ namespace PoMo.Client.Views
 
         private void GetData()
         {
-            this.SubscribeAsync().ContinueWith(
-                task => this.Dispatcher.Invoke(new Action<DataTable>(this.OnReceiveDataTable), task.Result),
-                TaskContinuationOptions.NotOnFaulted
-            );
+            Task.Delay(500) // Wait 1/2 a second to give the app time to flush the dispatcher.
+                .ContinueWith(task => this.SubscribeAsync(), TaskScheduler.Default)
+                .Unwrap()
+                .ContinueWith(
+                    task => this.Dispatcher.Invoke(new Action<DataTable>(this.OnReceiveDataTable), task.Result),
+                    TaskContinuationOptions.NotOnFaulted
+                );
         }
 
         private void OnReceiveDataTable(DataTable dataTable)

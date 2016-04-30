@@ -118,7 +118,7 @@ namespace PoMo.Loader
                 {
                     builder.Append(" NOT NULL");
                 }
-                if (property.Name == nameof(IdentityObjectBase.Id))
+                if (property.Name == "Id")
                 {
                     builder.Append(" PRIMARY KEY");
                 }
@@ -138,7 +138,6 @@ namespace PoMo.Loader
 
         private static void Main()
         {
-            Program.CreateDatabase();
             string uri = "http://www.google.com/finance/info?infotype=infoquoteall&q=" + string.Join(",", Program._tickers);
             HttpWebRequest request = WebRequest.CreateHttp(uri);
             string text;
@@ -150,6 +149,7 @@ namespace PoMo.Loader
                 }
             }
             JArray jArray = JsonConvert.DeserializeObject<JArray>(text);
+            Program.CreateDatabase();
             Security[] securities = new Security[jArray.Count];
             for (int index = 0; index < jArray.Count; index++)
             {
@@ -167,7 +167,7 @@ namespace PoMo.Loader
                 {
                     context.Portfolios.Add(portfolio);
                 }
-                Random random = new Random(Guid.NewGuid().ToByteArray().Sum(x => x));
+                Random random = new Random();
                 DateTime tradeDate = DateTime.Now;
                 foreach (Security item in securities)
                 {
@@ -179,8 +179,8 @@ namespace PoMo.Loader
                         {
                             continue;
                         }
-                        int quantity = random.Next(100, 5000);
-                        bool isShort = random.Next(2) == 1;
+                        int quantity = random.Next(200, 5000);
+                        bool isShort = random.NextDouble() >= 0.5;
                         context.Trades.Add(new Trade
                         {
                             Security = security,

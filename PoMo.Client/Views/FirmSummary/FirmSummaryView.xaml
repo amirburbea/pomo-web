@@ -10,9 +10,23 @@
     <UserControl.Resources>
         <views:NumericSignConverter x:Key="SignConverter" />
     </UserControl.Resources>
-    <DockPanel>
-        <Border DockPanel.Dock="Bottom" Background="LightGray">
-            <TextBlock Margin="3">
+    <views:DataContentControl>
+        <views:DataContentControl.Style>
+            <Style TargetType="{x:Type views:DataContentControl}">
+                <Style.Triggers>
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding IsVisible, RelativeSource={RelativeSource Self}}" Value="True" />
+                            <Condition Binding="{Binding Data}" Value="{x:Null}" />
+                        </MultiDataTrigger.Conditions>
+                        <Setter Property="IsWaiting" Value="True" />
+                    </MultiDataTrigger>
+                </Style.Triggers>
+            </Style>
+        </views:DataContentControl.Style>
+        <DockPanel>
+            <Border DockPanel.Dock="Bottom" Background="LightGray">
+                <TextBlock Margin="3">
                 <Run Text="Total Pnl:" />
                 <Run Text="{Binding Pnl, Mode=OneWay, StringFormat='{}{0:#,##0;(#,##0)}'}" FontWeight="SemiBold">
                     <Run.Style>
@@ -28,19 +42,20 @@
                         </Style>
                     </Run.Style>
                 </Run>
-            </TextBlock>
-        </Border>
-        <DataGrid ItemsSource="{Binding Data}" HorizontalGridLinesBrush="LightGray" 
-            VerticalGridLinesBrush="LightGray" BorderThickness="0,0,0,1" IsReadOnly="True" 
-            AutoGenerateColumns="False" AlternatingRowBackground="#33cecbcc">
-            <DataGrid.Resources>
-                <ResourceDictionary Source="/Views/DataGridStyles.xaml" />
-            </DataGrid.Resources>
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Code" Binding="{Binding PortfolioId}" CellStyle="{StaticResource SemiBoldCellStyle}" ElementStyle="{StaticResource PaddedElementStyle}" />
-                <DataGridTextColumn Header="Name" Binding="{Binding PortfolioName}" ElementStyle="{StaticResource PaddedElementStyle}" />
-                <DataGridTextColumn Header="Pnl" Binding="{Binding Pnl, StringFormat='{}{0:#,##0;(#,##0)}'}" CellStyle="{StaticResource SemiBoldCellStyle}" ElementStyle="{StaticResource RightAlignSignElementStyle}" />
-            </DataGrid.Columns>
-        </DataGrid>
-    </DockPanel>
+                </TextBlock>
+            </Border>
+            <DataGrid ItemsSource="{Binding Data}" HorizontalGridLinesBrush="LightGray" 
+                VerticalGridLinesBrush="LightGray" BorderThickness="0,0,0,1" IsReadOnly="True" 
+                AutoGenerateColumns="False" AlternatingRowBackground="#33cecbcc">
+                <DataGrid.Resources>
+                    <ResourceDictionary Source="/Views/DataGridStyles.xaml" />
+                </DataGrid.Resources>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Code" Binding="{Binding PortfolioId}" CellStyle="{StaticResource SemiBoldCellStyle}" ElementStyle="{StaticResource PaddedElementStyle}" />
+                    <DataGridTextColumn Header="Name" Binding="{Binding PortfolioName}" ElementStyle="{StaticResource PaddedElementStyle}" />
+                    <DataGridTextColumn Header="Pnl" Binding="{Binding Pnl, StringFormat='{}{0:#,##0;(#,##0)}'}" CellStyle="{StaticResource SemiBoldCellStyle}" ElementStyle="{StaticResource RightAlignSignElementStyle}" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+    </views:DataContentControl>
 </UserControl>

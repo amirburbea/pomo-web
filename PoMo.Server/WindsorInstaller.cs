@@ -14,7 +14,7 @@ namespace PoMo.Server
         {
             container
                 .Register(Component.For<IApplication>().ImplementedBy<Application>())
-                .Register(Component.For<DataContext, IDataContext>().ImplementedBy<DataContext>())
+                .Register(Component.For<ITradeRepository, IDataContext>().ImplementedBy<DataContext>())
                 .Register(Component.For<IFirmData>().ImplementedBy<FirmData>())
                 .Register(Component.For<IServerContract>().ImplementedBy<DataService>())
                 .Register(Component.For<ITradeFactory>().ImplementedBy<TradeFactory>())

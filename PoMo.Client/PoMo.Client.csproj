@@ -79,6 +79,7 @@
     <Compile Include="ReadOnlyDataRowCollectionWrapper.cs" />
     <Compile Include="PortfolioChangeEventArgs.cs" />
     <Compile Include="ChangeEventArgs.cs" />
+    <Compile Include="Views\DataContentControl.cs" />
     <Compile Include="Views\FirmSummary\FirmSummaryView.xaml.cs">
       <DependentUpon>FirmSummaryView.xaml</DependentUpon>
     </Compile>
@@ -101,6 +102,10 @@
     <Compile Include="Program.cs" />
     <Compile Include="Views\Shell\WindsorInstaller.cs" />
     <Compile Include="WindsorInstaller.cs" />
+    <Page Include="Themes\Generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\DataGridStyles.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

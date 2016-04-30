@@ -66,7 +66,7 @@ namespace PoMo.Server
             }
             this._tradeFactory.TradesCreated += this.TradeFactory_TradesCreated;
             this._marketDataProvider.PricesChanged += this.MarketDataProvider_PricesChanged;
-            this._timer = new Timer(this.Timer_Elapsed, null, 5000, 5000);
+            this._timer = new Timer(this.Timer_Elapsed, null, 5000, 4000);
         }
 
         public event EventHandler<DataEventArgs<RowChangeBase[]>> SummaryChanged;

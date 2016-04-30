@@ -16,16 +16,16 @@ namespace PoMo.Server
     internal sealed class TradeFactory : ITradeFactory, IDisposable
     {
         private const int Interval = 20000;
-
-        private readonly DataContext _dataContext;
+        
         private readonly IMarketDataProvider _marketDataProvider;
         private readonly string[] _portfolioIds;
         private readonly Dictionary<int, decimal> _prices = new Dictionary<int, decimal>();
         private readonly Random _random = new Random();
         private readonly List<Security> _securities = new List<Security>();
         private readonly Timer _timer;
+        private readonly ITradeRepository _tradeRepository;
 
-        public TradeFactory(DataContext dataContext, IMarketDataProvider marketDataProvider)
+        public TradeFactory(IDataContext dataContext, IMarketDataProvider marketDataProvider, ITradeRepository tradeRepository)
         {
             this._portfolioIds = dataContext.Portfolios.Select(portfolio => portfolio.Id).ToArray();
             foreach (Security security in dataContext.Securities.OrderBy(security => security.Ticker))
@@ -33,8 +33,8 @@ namespace PoMo.Server
                 this._securities.Add(security);
                 this._prices.Add(security.Id, security.OpeningPrice);
             }
-            this._dataContext = dataContext;
             this._marketDataProvider = marketDataProvider;
+            this._tradeRepository = tradeRepository;
             this._timer = new Timer(this.Timer_Elapsed, null, TradeFactory.Interval, TradeFactory.Interval);
             this._marketDataProvider.PricesChanged += this.MarketDataProvider_PricesChanged;
         }
@@ -83,7 +83,7 @@ namespace PoMo.Server
                     string portfolioId = this._portfolioIds[this._random.Next(0, this._portfolioIds.Length)];
                     Security security = this._securities[this._random.Next(0, this._securities.Count)];
                     int quantity = this._random.Next(-5000, 5000);
-                    trades[index] = this._dataContext.Trades.Add(new Trade
+                    trades[index] = this._tradeRepository.AddTrade(new Trade
                     {
                         Security = security,
                         SecurityId = security.Id,
@@ -93,7 +93,7 @@ namespace PoMo.Server
                         TradeDate = tradeDate
                     });
                 }
-                this._dataContext.SaveChanges();
+                this._tradeRepository.SaveChanges();
             }
             this.OnTradesCreated(trades);
         }

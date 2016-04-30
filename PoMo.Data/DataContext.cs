@@ -22,7 +22,14 @@ namespace PoMo.Data
         }
     }
 
-    public sealed class DataContext : DbContext, IDataContext
+    public interface ITradeRepository
+    {
+        Trade AddTrade(Trade trade);
+
+        void SaveChanges();
+    }
+
+    public sealed class DataContext : DbContext, IDataContext, ITradeRepository
     {
         public DataContext()
             : base(ConnectionStringMethods.GetConnectionString())
@@ -31,17 +38,27 @@ namespace PoMo.Data
             this.Configuration.LazyLoadingEnabled = this.Configuration.ProxyCreationEnabled = false;
         }
 
+        IQueryable<Security> IDataContext.Securities => this.Securities;
+
+        IQueryable<Trade> IDataContext.Trades => this.Trades;
+
+        IQueryable<Portfolio> IDataContext.Portfolios => this.Portfolios;
+
         public DbSet<Portfolio> Portfolios => this.Set<Portfolio>();
 
         public DbSet<Security> Securities => this.Set<Security>();
 
         public DbSet<Trade> Trades => this.Set<Trade>();
 
-        IQueryable<Security> IDataContext.Securities => this.Securities;
+        Trade ITradeRepository.AddTrade(Trade trade)
+        {
+            return this.Trades.Add(trade);
+        }
 
-        IQueryable<Trade> IDataContext.Trades => this.Trades;
-
-        IQueryable<Portfolio> IDataContext.Portfolios => this.Portfolios;
+        void ITradeRepository.SaveChanges()
+        {
+            this.SaveChanges();
+        }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
