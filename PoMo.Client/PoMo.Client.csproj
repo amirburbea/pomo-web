@@ -76,6 +76,7 @@
     <Compile Include="Controls\ControlMethods.cs" />
     <Compile Include="Controls\ITabTearOffHandler.cs" />
     <Compile Include="Converters\ObjectIsNullConverter.cs" />
+    <Compile Include="IWcfSettings.cs" />
     <Compile Include="Properties\WindsorInstaller.cs" />
     <Compile Include="ReadOnlyDataRowCollectionWrapper.cs" />
     <Compile Include="PortfolioChangeEventArgs.cs" />

@@ -14,14 +14,6 @@ using PoMo.Common.ServiceModel.Contracts;
 
 namespace PoMo.Client
 {
-    public interface IWcfSettings
-    {
-        string WcfUri
-        {
-            get;
-        }
-    }
-
     public interface IConnectionManager
     {
         event EventHandler ConnectionStatusChanged;
