@@ -137,17 +137,20 @@ namespace PoMo.Client.Views
                     {
                         foreach (ColumnChange columnChange in ((RowColumnsChanged)rowChange).ColumnChanges)
                         {
-                            DataColumn column;
-                            if (columnChange.Value != null && columnChange.Value != DBNull.Value && !(column = this._dataTable.Columns[columnChange.ColumnName]).DataType.IsInstanceOfType(columnChange.Value))
+                            DataColumn column = this._dataTable.Columns[columnChange.ColumnName];
+                            if (columnChange.Value != null && columnChange.Value != DBNull.Value)
                             {
-                                columnChange.Value = Convert.ChangeType(columnChange.Value, column.DataType);
+                                if (!column.DataType.IsInstanceOfType(columnChange.Value))
+                                {
+                                    columnChange.Value = Convert.ChangeType(columnChange.Value, column.DataType);
+                                }
+                                if (columnChange.ColumnName == "Pnl")
+                                {
+                                    // Delta in Pnl
+                                    pnl += (decimal)columnChange.Value - rowPnl;
+                                }
                             }
-                            if (columnChange.ColumnName == "Pnl")
-                            {
-                                // Delta in Pnl
-                                pnl += (decimal)columnChange.Value - rowPnl;
-                            }
-                            dataRow[columnChange.ColumnName] = columnChange.Value;
+                            dataRow[column] = columnChange.Value;
                         }
                     }
                 }
