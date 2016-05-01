@@ -39,10 +39,12 @@
       <HintPath>..\packages\Castle.Windsor.3.3.0\lib\net45\Castle.Windsor.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -60,12 +62,8 @@
     <Compile Include="DataObjects\RowChangeBase.cs" />
     <Compile Include="DataObjects\RowChangeType.cs" />
     <Compile Include="DataObjects\RowColumnsChanged.cs" />
+    <Compile Include="Json\PoMoContractResolver.cs" />
     <Compile Include="NotifierBase.cs" />
-    <Compile Include="ServiceModel\BindingFactory.cs" />
-    <Compile Include="ServiceModel\Contracts\ICallbackContract.cs" />
-    <Compile Include="ServiceModel\Contracts\IServerContract.cs" />
-    <Compile Include="ServiceModel\ServicesNamespace.cs" />
-    <Compile Include="ServiceModel\ServiceModelMethods.cs" />
     <Compile Include="Windsor\FactoryMethods.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

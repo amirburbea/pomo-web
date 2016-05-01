@@ -110,7 +110,17 @@ namespace PoMo.Client.Views
                 if (rowChange.ChangeType == RowChangeType.Added)
                 {
                     DataRow dataRow = this._dataTable.NewRow();
-                    dataRow.ItemArray = ((RowAdded)rowChange).Data;
+                    RowAdded rowAdded = (RowAdded)rowChange;
+                    for (int index = 0; index < rowAdded.Data.Length; index++)
+                    {
+                        object value = rowAdded.Data[index];
+                        DataColumn column;
+                        if (value != null && value != DBNull.Value && !(column = this._dataTable.Columns[index]).DataType.IsInstanceOfType(value))
+                        {
+                            rowAdded.Data[index] = Convert.ChangeType(value, column.DataType);
+                        }
+                    }
+                    dataRow.ItemArray = rowAdded.Data;
                     this._dataTable.Rows.InsertAt(dataRow, ~wrapper.BinarySearchByValue((string)rowChange.RowKey, row => row.Field<string>("Ticker")));
                     pnl += dataRow.Field<decimal>("Pnl");
                 }
@@ -127,6 +137,11 @@ namespace PoMo.Client.Views
                     {
                         foreach (ColumnChange columnChange in ((RowColumnsChanged)rowChange).ColumnChanges)
                         {
+                            DataColumn column;
+                            if (columnChange.Value != null && columnChange.Value != DBNull.Value && !(column = this._dataTable.Columns[columnChange.ColumnName]).DataType.IsInstanceOfType(columnChange.Value))
+                            {
+                                columnChange.Value = Convert.ChangeType(columnChange.Value, column.DataType);
+                            }
                             if (columnChange.ColumnName == "Pnl")
                             {
                                 // Delta in Pnl

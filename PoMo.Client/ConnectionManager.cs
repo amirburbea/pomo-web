@@ -1,16 +1,16 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using System.ServiceModel;
-using System.ServiceModel.Channels;
-using System.ServiceModel.Description;
+using System.IO;
+using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNet.SignalR.Client;
+using Newtonsoft.Json;
 using PoMo.Common.DataObjects;
-using PoMo.Common.ServiceModel;
-using PoMo.Common.ServiceModel.Contracts;
+using ConnectionState = Microsoft.AspNet.SignalR.Client.ConnectionState;
 
 namespace PoMo.Client
 {
@@ -40,35 +40,24 @@ namespace PoMo.Client
 
     internal sealed class ConnectionManager : IConnectionManager, IDisposable
     {
-        private const int HeartbeatPeriod = 60000;
-
-        private readonly Thread _channelThread;
-        private readonly DuplexChannelFactory<IServerContract> _factory;
-        private readonly Timer _heartbeatTimer;
-        private readonly ConcurrentQueue<IRequest> _requests = new ConcurrentQueue<IRequest>();
-        private readonly AutoResetEvent _resetEvent;
-        private IServerContract _channel;
+        private readonly string _baseUri;
+        private readonly HubConnection _hubConnection;
+        private readonly IHubProxy _hubProxy;
+        private readonly JsonSerializer _jsonSerializer;
         private bool _isDisposed;
 
-        public ConnectionManager(Binding binding, IWcfSettings wcfSettings)
+        public ConnectionManager(IWebSettings webSettings, JsonSerializer jsonSerializer)
         {
-            this._factory = new DuplexChannelFactory<IServerContract>(
-                new InstanceContext(new Callback(this)),
-                new ServiceEndpoint(
-                    ContractDescription.GetContract(typeof(IServerContract)),
-                    binding,
-                    new EndpointAddress(wcfSettings.WcfUri)
-                )
-            );
-            this._resetEvent = new AutoResetEvent(true);
-            this._channelThread = new Thread(this.Run)
-            {
-                IsBackground = true,
-                Priority = ThreadPriority.BelowNormal,
-                Name = nameof(ConnectionManager)
-            };
-            this._channelThread.Start();
-            this._heartbeatTimer = new Timer(this.Timer_Elapsed, null, ConnectionManager.HeartbeatPeriod, ConnectionManager.HeartbeatPeriod);
+            this._jsonSerializer = jsonSerializer;
+            this._baseUri = $"http://{webSettings.Host}:{webSettings.Port}/pomo/";
+            this._hubConnection = new HubConnection(this._baseUri + "signalr") { JsonSerializer = jsonSerializer };
+            this._hubProxy = this._hubConnection.CreateHubProxy("data");
+            this._hubProxy.On<RowChangeBase[]>(nameof(this.OnFirmSummaryChanged), this.OnFirmSummaryChanged);
+            this._hubProxy.On<string, RowChangeBase[]>(nameof(this.OnPortfolioChanged), this.OnPortfolioChanged);
+            // SignalR guide says to add this line.
+            ServicePointManager.DefaultConnectionLimit = 10;
+            this._hubConnection.StateChanged += this.HubConnection_StateChanged;
+            this._hubConnection.Start();
         }
 
         public event EventHandler ConnectionStatusChanged;
@@ -77,27 +66,17 @@ namespace PoMo.Client
 
         public event EventHandler<PortfolioChangeEventArgs> PortfolioChanged;
 
-        private interface IRequest
-        {
-            void Run(IServerContract channel);
-        }
-
         public ConnectionStatus ConnectionStatus
         {
             get
             {
-                if (this._channel == null)
+                switch (this._hubConnection.State)
                 {
-                    return ConnectionStatus.Disconnected;
-                }
-                ICommunicationObject communicationObject = (ICommunicationObject)this._channel;
-                switch (communicationObject.State)
-                {
-                    case CommunicationState.Created:
-                    case CommunicationState.Opening:
-                        return ConnectionStatus.Connecting;
-                    case CommunicationState.Opened:
+                    case ConnectionState.Connected:
                         return ConnectionStatus.Connected;
+                    case ConnectionState.Connecting:
+                    case ConnectionState.Reconnecting:
+                        return ConnectionStatus.Connecting;
                 }
                 return ConnectionStatus.Disconnected;
             }
@@ -105,109 +84,111 @@ namespace PoMo.Client
 
         public void Dispose()
         {
+            this._isDisposed = true;
+            this._hubConnection.StateChanged -= this.HubConnection_StateChanged;
+            this._hubConnection.Dispose();
+        }
+
+        public async Task<PortfolioModel[]> GetPortfoliosAsync(IDisposable busyScope)
+        {
+            using (busyScope)
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    string text = await client.GetStringAsync(this._baseUri + "api/portfolios").ConfigureAwait(false);
+                    using (TextReader textReader = new StringReader(text))
+                    {
+                        using (JsonTextReader jsonReader = new JsonTextReader(textReader))
+                        {
+                            return this._jsonSerializer.Deserialize<PortfolioModel[]>(jsonReader);
+                        }
+                    }
+                }
+            }
+        }
+
+        public async Task<DataTable> SubscribeToFirmSummaryAsync(IDisposable busyScope)
+        {
+            using (busyScope)
+            {
+                return await this._hubProxy.Invoke<DataTable>("SubscribeToFirmSummary").ConfigureAwait(false);
+            }
+        }
+
+        public async Task<DataTable> SubscribeToPortfolioAsync(string portfolioId, IDisposable busyScope)
+        {
+            using (busyScope)
+            {
+                return await this._hubProxy.Invoke<DataTable>("SubscribeToPortfolio", portfolioId).ConfigureAwait(false);
+            }
+        }
+
+        public async Task UnsubscribeFromFirmSummaryAsync(IDisposable busyScope)
+        {
+            using (busyScope)
+            {
+                await this._hubProxy.Invoke("UnsubscribeFromFirmSummary").ConfigureAwait(false);
+            }
+        }
+
+        public async Task UnsubscribeFromPortfolioAsync(string portfolioId, IDisposable busyScope)
+        {
+            using (busyScope)
+            {
+                await this._hubProxy.Invoke("UnsubscribeFromPortfolio", portfolioId).ConfigureAwait(false);
+            }
+        }
+
+        private void HubConnection_StateChanged(StateChange state)
+        {
             if (this._isDisposed)
             {
                 return;
             }
-            this._isDisposed = true;
-            this._resetEvent.Set();
-            this._channelThread.Join();
-            if (this._channel != null)
+            this.ConnectionStatusChanged?.Invoke(this, EventArgs.Empty);
+            if (state.NewState == ConnectionState.Disconnected)
             {
-                ICommunicationObject communicationObject = (ICommunicationObject)this._channel;
-                communicationObject.Closed -= this.Channel_ClosedOrFaulted;
-                communicationObject.Faulted -= this.Channel_ClosedOrFaulted;
-            }
-            ServiceModelMethods.TryClose(Interlocked.Exchange(ref this._channel, null));
-            ServiceModelMethods.TryClose(this._factory);
-            using (this._heartbeatTimer)
-            {
-                this._heartbeatTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                this.OnDisconnected();
             }
         }
 
-        Task<PortfolioModel[]> IConnectionManager.GetPortfoliosAsync(IDisposable busyScope)
+        private void OnDisconnected()
         {
-            return this.EnqueueRequest(channel => channel.GetPortfolios(), busyScope);
-        }
-
-        Task<DataTable> IConnectionManager.SubscribeToFirmSummaryAsync(IDisposable busyScope)
-        {
-            return this.EnqueueRequest(channel => channel.SubscribeToFirmSummary(), busyScope);
-        }
-
-        Task<DataTable> IConnectionManager.SubscribeToPortfolioAsync(string portfolioId, IDisposable busyScope)
-        {
-            return this.EnqueueRequest(channel => channel.SubscribeToPortfolio(portfolioId), busyScope);
-        }
-
-        Task IConnectionManager.UnsubscribeFromFirmSummaryAsync(IDisposable busyScope)
-        {
-            return this.EnqueueRequest(channel => channel.UnsubscribeFromFirmSummary(), busyScope);
-        }
-
-        Task IConnectionManager.UnsubscribeFromPortfolioAsync(string portfolioId, IDisposable busyScope)
-        {
-            return this.EnqueueRequest(channel => channel.UnsubscribeFromPortfolio(portfolioId), busyScope);
-        }
-
-        private void Channel_ClosedOrFaulted(object sender, EventArgs e)
-        {
-            ICommunicationObject communicationObject = (ICommunicationObject)sender;
-            communicationObject.Closed -= this.Channel_ClosedOrFaulted;
-            communicationObject.Faulted -= this.Channel_ClosedOrFaulted;
-            Interlocked.CompareExchange(ref this._channel, null, (IServerContract)sender);
-            this.OnConnectionStatusChanged();
-            this._resetEvent.Set();
-        }
-
-        private Task EnqueueRequest(Action<IServerContract> action, IDisposable busyScope)
-        {
-            return this.EnqueueRequest(
-                channel =>
+            if (this._isDisposed)
+            {
+                return;
+            }
+            bool success = this._hubConnection.Start().ContinueWith(task => !task.IsFaulted, TaskScheduler.Default).Result;
+            if (success)
+            {
+                return;
+            }
+            Task.Factory.StartNew(
+                () =>
                 {
-                    action(channel);
-                    return default(object);
+                    // Waiting five seconds to reconnect but checking for disposal or connection forced some other way every second.
+                    for (int index = 0; index < 5; index++)
+                    {
+                        if (this._isDisposed || this._hubConnection.State != ConnectionState.Disconnected)
+                        {
+                            return;
+                        }
+                        Thread.Sleep(TimeSpan.FromSeconds(1d));
+                    }
+                    if (!this._isDisposed && this._hubConnection.State == ConnectionState.Disconnected)
+                    {
+                        this.OnDisconnected();
+                    }
                 },
-                busyScope
+                CancellationToken.None,
+                TaskCreationOptions.None,
+                TaskScheduler.Default
             );
         }
 
-        private Task<TResult> EnqueueRequest<TResult>(Func<IServerContract, TResult> function, IDisposable busyScope)
+        private void OnFirmSummaryChanged(string text)
         {
-            try
-            {
-                Request<TResult> request = new Request<TResult>(function, busyScope);
-                this._requests.Enqueue(request);
-                return request.Task;
-            }
-            finally
-            {
-                this._resetEvent.Set();
-            }
-        }
-
-        private IServerContract InitializeChannel()
-        {
-            IServerContract channel = this._factory.CreateChannel();
-            ICommunicationObject communicationObject = (ICommunicationObject)channel;
-            try
-            {
-                communicationObject.Open();
-            }
-            catch
-            {
-                ServiceModelMethods.TryClose(channel);
-                return null;
-            }
-            communicationObject.Closed += this.Channel_ClosedOrFaulted;
-            communicationObject.Faulted += this.Channel_ClosedOrFaulted;
-            return channel;
-        }
-
-        private void OnConnectionStatusChanged()
-        {
-            this.ConnectionStatusChanged?.Invoke(this, EventArgs.Empty);
+            Debug.WriteLine(text);
         }
 
         private void OnFirmSummaryChanged(IReadOnlyCollection<RowChangeBase> changes)
@@ -218,119 +199,6 @@ namespace PoMo.Client
         private void OnPortfolioChanged(string portfolioId, IReadOnlyCollection<RowChangeBase> changes)
         {
             this.PortfolioChanged?.Invoke(this, new PortfolioChangeEventArgs(portfolioId, changes));
-        }
-
-        private void Run()
-        {
-            while (!this._isDisposed && this._resetEvent.WaitOne())
-            {
-                try
-                {
-                    if (this._isDisposed)
-                    {
-                        return;
-                    }
-                    if (this._channel == null)
-                    {
-                        if ((this._channel = this.InitializeChannel()) == null)
-                        {
-                            this.OnConnectionStatusChanged();
-                            continue;
-                        }
-                        this._channel.RegisterClient();
-                        this.OnConnectionStatusChanged();
-                    }
-                    while (!this._isDisposed && this._channel != null && ((ICommunicationObject)this._channel).State == CommunicationState.Opened)
-                    {
-                        IRequest request;
-                        if (!this._requests.TryDequeue(out request))
-                        {
-                            break;
-                        }
-                        request.Run(this._channel);
-                    }
-                }
-                catch (CommunicationException e)
-                {
-                    Debug.WriteLine(e);
-                }
-            }
-        }
-
-        private void Timer_Elapsed(object state)
-        {
-            if (!this._isDisposed)
-            {
-                this.EnqueueRequest(channel => channel.Heartbeat(), null);
-            }
-        }
-
-        private sealed class Callback : ICallbackContract
-        {
-            private readonly ConnectionManager _connectionManager;
-
-            public Callback(ConnectionManager connectionManager)
-            {
-                this._connectionManager = connectionManager;
-            }
-
-            public void Heartbeat()
-            {
-                Debug.WriteLine("Heartbeat received from server.");
-            }
-
-            public void OnFirmSummaryChanged(RowChangeBase[] changes)
-            {
-                Task.Factory.StartNew(
-                    arg => this._connectionManager.OnFirmSummaryChanged((RowChangeBase[])arg),
-                    changes,
-                    CancellationToken.None,
-                    TaskCreationOptions.None,
-                    TaskScheduler.Default
-                );
-            }
-
-            public void OnPortfolioChanged(string portfolioId, RowChangeBase[] changes)
-            {
-                Task.Factory.StartNew(
-                    () => this._connectionManager.OnPortfolioChanged(portfolioId, changes),
-                    CancellationToken.None,
-                    TaskCreationOptions.None,
-                    TaskScheduler.Default
-                );
-            }
-        }
-
-        private sealed class Request<TResult> : IRequest
-        {
-            private readonly IDisposable _busyScope;
-            private readonly Func<IServerContract, TResult> _function;
-            private readonly TaskCompletionSource<TResult> _taskCompletionSource;
-
-            public Request(Func<IServerContract, TResult> function, IDisposable busyScope)
-            {
-                this._taskCompletionSource = new TaskCompletionSource<TResult>();
-                this._function = function;
-                this._busyScope = busyScope;
-            }
-
-            public Task<TResult> Task => this._taskCompletionSource.Task;
-
-            public void Run(IServerContract channel)
-            {
-                try
-                {
-                    this._taskCompletionSource.TrySetResult(this._function(channel));
-                }
-                catch (Exception e)
-                {
-                    this._taskCompletionSource.TrySetException(e);
-                }
-                finally
-                {
-                    this._busyScope?.Dispose();
-                }
-            }
         }
     }
 }

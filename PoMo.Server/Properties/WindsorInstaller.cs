@@ -1,8 +1,9 @@
 ﻿using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
+using PoMo.Server.Web;
 
-namespace PoMo.Client.Properties
+namespace PoMo.Server.Properties
 {
     public sealed class WindsorInstaller : IWindsorInstaller
     {

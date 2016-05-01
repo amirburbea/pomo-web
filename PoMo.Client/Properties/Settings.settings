@@ -2,8 +2,11 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="PoMo.Client.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="WcfUri" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">net.tcp://localhost:8577/pomo</Value>
+    <Setting Name="WebHost" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">localhost</Value>
+    </Setting>
+    <Setting Name="WebPort" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">15236</Value>
     </Setting>
   </Settings>
 </SettingsFile>

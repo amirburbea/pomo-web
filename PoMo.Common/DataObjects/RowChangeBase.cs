@@ -1,12 +1,7 @@
-﻿using System;
-
-namespace PoMo.Common.DataObjects
+﻿namespace PoMo.Common.DataObjects
 {
-    [Serializable]
     public abstract class RowChangeBase
     {
-        private object _rowKey;
-
         public abstract RowChangeType ChangeType
         {
             get;
@@ -14,14 +9,8 @@ namespace PoMo.Common.DataObjects
 
         public object RowKey
         {
-            get
-            {
-                return this._rowKey;
-            }
-            set
-            {
-                this._rowKey = value;
-            }
+            get;
+            set;
         }
     }
 }

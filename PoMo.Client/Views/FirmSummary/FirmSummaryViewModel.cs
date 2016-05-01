@@ -19,7 +19,7 @@ namespace PoMo.Client.Views.FirmSummary
         {
             if (this.IsActive)
             {
-                this.Dispatcher.Invoke(DispatcherPriority.Normal, new Action<IReadOnlyCollection<RowChangeBase>>(this.ProcessChanges), e.RowChanges);
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action<IReadOnlyCollection<RowChangeBase>>(this.ProcessChanges), e.RowChanges);
             }
         }
 

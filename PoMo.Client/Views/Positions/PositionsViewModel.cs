@@ -41,7 +41,7 @@ namespace PoMo.Client.Views.Positions
         {
             if (this.IsActive && e.PortfolioId == this.Portfolio.Id)
             {
-                this.Dispatcher.Invoke(DispatcherPriority.Normal, new Action<IReadOnlyCollection<RowChangeBase>>(this.ProcessChanges), e.RowChanges);
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action<IReadOnlyCollection<RowChangeBase>>(this.ProcessChanges), e.RowChanges);
             }
         }
     }

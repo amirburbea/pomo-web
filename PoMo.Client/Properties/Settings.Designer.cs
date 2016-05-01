@@ -25,10 +25,19 @@ namespace PoMo.Client.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("net.tcp://localhost:8577/pomo")]
-        public string WcfUri {
+        [global::System.Configuration.DefaultSettingValueAttribute("localhost")]
+        public string WebHost {
             get {
-                return ((string)(this["WcfUri"]));
+                return ((string)(this["WebHost"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("15236")]
+        public int WebPort {
+            get {
+                return ((int)(this["WebPort"]));
             }
         }
     }
