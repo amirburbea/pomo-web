@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using Microsoft.AspNet.SignalR.Client;
 using Newtonsoft.Json;
 using PoMo.Common.DataObjects;
@@ -42,21 +43,23 @@ namespace PoMo.Client
         private readonly string _baseUri;
         private readonly HubConnection _hubConnection;
         private readonly IHubProxy _hubProxy;
+        private readonly Dispatcher _dispatcher;
         private readonly JsonSerializer _jsonSerializer;
         private bool _isDisposed;
 
-        public ConnectionManager(IWebSettings webSettings, JsonSerializer jsonSerializer)
+        public ConnectionManager(IWebSettings webSettings, Dispatcher dispatcher, JsonSerializer jsonSerializer)
         {
+            ServicePointManager.DefaultConnectionLimit = 10; // Needed for SignalR client in WPF.
+            this._dispatcher = dispatcher;
             this._jsonSerializer = jsonSerializer;
             this._baseUri = $"http://{webSettings.Host}:{webSettings.Port}/pomo/";
             this._hubConnection = new HubConnection(this._baseUri + "signalr") { JsonSerializer = jsonSerializer };
             this._hubProxy = this._hubConnection.CreateHubProxy("data");
             this._hubProxy.On<RowChangeBase[]>(nameof(this.OnFirmSummaryChanged), this.OnFirmSummaryChanged);
             this._hubProxy.On<string, RowChangeBase[]>(nameof(this.OnPortfolioChanged), this.OnPortfolioChanged);
-            // SignalR guide says to add this line.
-            ServicePointManager.DefaultConnectionLimit = 10;
             this._hubConnection.StateChanged += this.HubConnection_StateChanged;
             this._hubConnection.Start();
+            this._dispatcher.InvokeAsync(this.OnConnectionStatusChanged, DispatcherPriority.Background);
         }
 
         public event EventHandler ConnectionStatusChanged;
@@ -155,11 +158,16 @@ namespace PoMo.Client
             {
                 return;
             }
-            this.ConnectionStatusChanged?.Invoke(this, EventArgs.Empty);
+            this.OnConnectionStatusChanged();
             if (state.NewState == ConnectionState.Disconnected)
             {
                 this.OnDisconnected();
             }
+        }
+
+        private void OnConnectionStatusChanged()
+        {
+            this.ConnectionStatusChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnDisconnected()
@@ -168,7 +176,9 @@ namespace PoMo.Client
             {
                 return;
             }
-            bool success = this._hubConnection.Start().ContinueWith(task => !task.IsFaulted, TaskScheduler.Default).Result;
+            Task start = this._hubConnection.Start();
+            this._dispatcher.InvokeAsync(this.OnConnectionStatusChanged, DispatcherPriority.Background);
+            bool success = start.ContinueWith(task => !task.IsFaulted, TaskScheduler.Default).Result;
             if (success)
             {
                 return;
