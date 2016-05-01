@@ -186,11 +186,6 @@ namespace PoMo.Client
             );
         }
 
-        private void OnFirmSummaryChanged(string text)
-        {
-            Debug.WriteLine(text);
-        }
-
         private void OnFirmSummaryChanged(IReadOnlyCollection<RowChangeBase> changes)
         {
             this.FirmSummaryChanged?.Invoke(this, new ChangeEventArgs(changes));
