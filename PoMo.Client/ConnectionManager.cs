@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -86,7 +85,18 @@ namespace PoMo.Client
         {
             this._isDisposed = true;
             this._hubConnection.StateChanged -= this.HubConnection_StateChanged;
-            this._hubConnection.Dispose();
+            if (this._hubConnection.State != ConnectionState.Connected)
+            {
+                return;
+            }
+            try
+            {
+                this._hubConnection.Stop(TimeSpan.FromSeconds(1d));
+            }
+            catch (Exception)
+            {
+                // Do nothing.
+            }
         }
 
         public async Task<PortfolioModel[]> GetPortfoliosAsync(IDisposable busyScope)
