@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using Castle.Core;
 using Castle.MicroKernel;
 using Castle.MicroKernel.Context;
@@ -7,7 +6,6 @@ using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using PoMo.Common.Json;
 
@@ -18,7 +16,7 @@ namespace PoMo.Server.Web
         void IWindsorInstaller.Install(IWindsorContainer container, IConfigurationStore store)
         {
             container
-                .Register(Component.For<IContractResolver>().ImplementedBy<PoMoContractResolver>())
+                .Register(Component.For<IContractResolver>().ImplementedBy<JsonContractResolver>())
                 .Register(Component.For<JsonSerializer>().UsingFactory((IContractResolver contractResolver) => new JsonSerializer { ContractResolver = contractResolver }))
                 .Register(Classes.FromThisAssembly().BasedOn<IOwinStartup>())
                 .Register(Component.For<IWebManager>().ImplementedBy<WebManager>())

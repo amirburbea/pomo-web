@@ -14,7 +14,7 @@ namespace PoMo.Client
         void IWindsorInstaller.Install(IWindsorContainer container, IConfigurationStore store)
         {
             container
-                .Register(Component.For<IContractResolver>().ImplementedBy<PoMoContractResolver>())
+                .Register(Component.For<IContractResolver>().ImplementedBy<JsonContractResolver>())
                 .Register(Component.For<JsonSerializer>().UsingFactory((IContractResolver contractResolver) => new JsonSerializer { ContractResolver = contractResolver }))
                 .Register(Component.For<IConnectionManager>().ImplementedBy<ConnectionManager>())
                 .Register(Component.For<Application>().ImplementedBy<App>().OnCreate(app => ((App)app).InitializeComponent()))

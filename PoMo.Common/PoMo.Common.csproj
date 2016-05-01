@@ -60,8 +60,10 @@
     <Compile Include="DataObjects\RowChangeBase.cs" />
     <Compile Include="DataObjects\RowChangeType.cs" />
     <Compile Include="DataObjects\RowColumnsChanged.cs" />
-    <Compile Include="Json\PoMoContractResolver.cs" />
+    <Compile Include="Json\DataTableJsonConverter.cs" />
     <Compile Include="NotifierBase.cs" />
+    <Compile Include="Json\JsonContractResolver.cs" />
+    <Compile Include="Json\RowChangeJsonConverter.cs" />
     <Compile Include="Windsor\FactoryMethods.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
