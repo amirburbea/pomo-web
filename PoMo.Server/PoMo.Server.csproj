@@ -131,7 +131,6 @@
     <Compile Include="Position.cs" />
     <Compile Include="PositionData.cs" />
     <Compile Include="PriceChange.cs" />
-    <Compile Include="Properties\WindsorInstaller.cs" />
     <Compile Include="RandomMethods.cs" />
     <Compile Include="TradeFactory.cs" />
     <Compile Include="PortfolioData.cs" />
@@ -155,6 +154,7 @@
     <Compile Include="Web\SignalR\WindsorInstaller.cs" />
     <Compile Include="Web\StaticFiles\IStaticFileSettings.cs" />
     <Compile Include="Web\StaticFiles\OwinStartup.cs" />
+    <Compile Include="Web\StaticFiles\WindsorInstaller.cs" />
     <Compile Include="Web\WebApi\OwinStartup.cs" />
     <Compile Include="Web\WebApi\PortfoliosController.cs" />
     <Compile Include="Web\WebApi\WindsorInstaller.cs" />
