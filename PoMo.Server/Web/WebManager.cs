@@ -46,6 +46,7 @@ namespace PoMo.Server.Web
                     }
                 }
             );
+            Console.WriteLine(string.Concat("Running on ", this._url, "..."));
         }
 
         void IWebManager.Stop()
