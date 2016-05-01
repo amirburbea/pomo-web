@@ -114,8 +114,12 @@ namespace PoMo.Client.Views
                     for (int index = 0; index < rowAdded.Data.Length; index++)
                     {
                         object value = rowAdded.Data[index];
-                        DataColumn column;
-                        if (value != null && value != DBNull.Value && !(column = this._dataTable.Columns[index]).DataType.IsInstanceOfType(value))
+                        if (value == null || value == DBNull.Value)
+                        {
+                            continue;
+                        }
+                        DataColumn column = this._dataTable.Columns[index];
+                        if (!column.DataType.IsInstanceOfType(value))
                         {
                             rowAdded.Data[index] = Convert.ChangeType(value, column.DataType);
                         }
