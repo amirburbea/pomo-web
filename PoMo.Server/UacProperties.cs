@@ -64,8 +64,7 @@ namespace PoMo.Server
                 }
                 try
                 {
-                    TokenElevationType elevationResult = TokenElevationType.TokenElevationTypeDefault;
-                    int elevationResultSize = Marshal.SizeOf((int)elevationResult);
+                    int elevationResultSize = Marshal.SizeOf((int)TokenElevationType.TokenElevationTypeDefault);
                     IntPtr elevationTypePtr = Marshal.AllocHGlobal(elevationResultSize);
                     try
                     {
@@ -81,8 +80,7 @@ namespace PoMo.Server
                         {
                             throw new ApplicationException("Unable to determine the current elevation.");
                         }
-                        elevationResult = (TokenElevationType)Marshal.ReadInt32(elevationTypePtr);
-                        return elevationResult == TokenElevationType.TokenElevationTypeFull;
+                        return (TokenElevationType)Marshal.ReadInt32(elevationTypePtr) == TokenElevationType.TokenElevationTypeFull;
                     }
                     finally
                     {
