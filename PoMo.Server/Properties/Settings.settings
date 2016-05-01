@@ -8,5 +8,8 @@
     <Setting Name="WebSkipAdministratorCheck" Type="System.Boolean" Scope="Application">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="WebRoot" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">..\..\..\Web</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -40,5 +40,14 @@ namespace PoMo.Server.Properties {
                 return ((bool)(this["WebSkipAdministratorCheck"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("..\\..\\..\\Web")]
+        public string WebRoot {
+            get {
+                return ((string)(this["WebRoot"]));
+            }
+        }
     }
 }
