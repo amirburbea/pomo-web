@@ -1,0 +1,38 @@
+[
+  {
+    "outputFileName": "app/app.js",
+    "inputFiles": [
+      "app/app.js"
+    ]
+  },
+  {
+    "outputFileName": "app/homeController.js",
+    "inputFiles": [
+      "app/homeController.js"
+    ]
+  },
+  {
+    "outputFileName": "app/app.css",
+    "inputFiles": [
+      "app/app.css"
+    ]
+  },
+  {
+    "outputFileName": "app/notifications.js",
+    "inputFiles": [
+      "app/notifications.js"
+    ]
+  },
+  {
+    "outputFileName": "app/hubManager.js",
+    "inputFiles": [
+      "app/hubManager.js"
+    ]
+  },
+  {
+    "outputFileName": "app/stringFormat.js",
+    "inputFiles": [
+      "app/stringFormat.js"
+    ]
+  }
+]

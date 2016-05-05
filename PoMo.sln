@@ -17,6 +17,29 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{0FA235
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Loader", "Loader", "{7E887D65-1AE9-493D-8094-DB870CB553FF}"
 EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Web", "Web\", "{A89A3419-6813-4388-8847-8307A40DF5AA}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_64723"
+		Debug.AspNetCompiler.PhysicalPath = "Web\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_64723\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_64723"
+		Release.AspNetCompiler.PhysicalPath = "Web\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_64723\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "64723"
+		SlnRelativePath = "Web\"
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{9B1F53B9-B97D-4876-88B1-104548224FC4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +62,10 @@ Global
 		{115953EE-3A31-4CE8-A354-415446A00CD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{115953EE-3A31-4CE8-A354-415446A00CD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{115953EE-3A31-4CE8-A354-415446A00CD3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A89A3419-6813-4388-8847-8307A40DF5AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A89A3419-6813-4388-8847-8307A40DF5AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A89A3419-6813-4388-8847-8307A40DF5AA}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{A89A3419-6813-4388-8847-8307A40DF5AA}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -48,5 +75,6 @@ Global
 		{6EA3D0B6-8530-4AE4-AEDE-4DB5A3FBA8B4} = {0FA23532-93FF-4A4A-913E-14E1411E77BA}
 		{82FA4E3E-2213-40CF-BAB6-9EF052D72B80} = {7E887D65-1AE9-493D-8094-DB870CB553FF}
 		{115953EE-3A31-4CE8-A354-415446A00CD3} = {0FA23532-93FF-4A4A-913E-14E1411E77BA}
+		{A89A3419-6813-4388-8847-8307A40DF5AA} = {9B1F53B9-B97D-4876-88B1-104548224FC4}
 	EndGlobalSection
 EndGlobal
