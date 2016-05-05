@@ -34,5 +34,35 @@
     "inputFiles": [
       "app/stringFormat.js"
     ]
+  },
+  {
+    "outputFileName": "app/loadingIndicator.js",
+    "inputFiles": [
+      "app/loadingIndicator.js"
+    ]
+  },
+  {
+    "outputFileName": "app/firmSummaryController.js",
+    "inputFiles": [
+      "app/firmSummaryController.js"
+    ]
+  },
+  {
+    "outputFileName": "app/titlebar.js",
+    "inputFiles": [
+      "app/titlebar.js"
+    ]
+  },
+  {
+    "outputFileName": "app/portfolioController.js",
+    "inputFiles": [
+      "app/portfolioController.js"
+    ]
+  },
+  {
+    "outputFileName": "scripts/ngGridFlexibleHeightPlugin.js",
+    "inputFiles": [
+      "scripts/ngGridFlexibleHeightPlugin.js"
+    ]
   }
 ]

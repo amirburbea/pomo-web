@@ -40,6 +40,9 @@
         }
 
         connection.stateChanged(function(change) {
+            if (currentView) {
+                currentView.setIsLoading();
+            }
             switch (change.newState) {
             case $.signalR.connectionState.connecting:
                 notifications.info('Attempting to connect.', 'Connecting to PoMo...');
@@ -60,8 +63,7 @@
                 }, 150);
                 break;
             case $.signalR.connectionState.disconnected:
-                if (currentView) {
-                }
+                
                 notifications.error('Will attempt to reconnect in a minute.', 'Connection to PoMo lost...');
                 setTimeout(connect, 60000);
                 break;

@@ -19,8 +19,8 @@
                 $scope.state = {
                     isFirmSummary: $location.path() === '/',
                     portfolioId: (function() {
-                        var path = $location.path();
-                        return path.startsWith('/portfolio/') ? path.substring(11) : null;
+                        var path = $location.path().toString();
+                        return path.length > 11 && path.substring(0, 11) == '/portfolio/' ? path.substring(11) : null;
                     })(),
                     portfolios: sessionPortfolios ? JSON.parse(sessionPortfolios) : []
                 };

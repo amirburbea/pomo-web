@@ -8,13 +8,16 @@
         width: auto !important;
     }
 </style>
-
-<div class="col-md-10">
-    <div style="background-color:darkgray;margin-bottom:5px"><div style="text-align:center;font-weight:bold">Firm Summary</div></div>
-</div>
-<div class="col-md-10">
-    <div ng-grid="gridOptions" class="gridStyle"></div>
-</div>
-<div class="col-md-4" style="margin-left:15px;margin-top:15px;background:darkgray">
-    Total Pnl: <span class="semiBold" ng-style="{color:state.totalPnl() < 0 ? 'darkred' : 'darkgreen'}">{{state.totalPnl() | stringFormat:'#,##0;(#,##0)'}}</span>
+<div loading-indicator="state.isLoading()">
+    <div class="col-md-10">
+        <div style="background-color: darkgray; margin-bottom: 5px">
+            <div style="text-align: center; font-weight: bold">Firm Summary</div>
+        </div>
+    </div>
+    <div class="col-md-10" ng-style="{opacity:state.isLoading()?.75:1}">
+        <div ng-grid="gridOptions" class="gridStyle"></div>
+    </div>
+    <div class="col-md-4" style="margin-left: 15px; margin-top: 15px; background: darkgray">
+        Total Pnl: <span class="semiBold" ng-style="{color:state.totalPnl() < 0 ? 'darkred' : 'darkgreen'}">{{state.totalPnl() | stringFormat:'#,##0;(#,##0)'}}</span>
+    </div>
 </div>
