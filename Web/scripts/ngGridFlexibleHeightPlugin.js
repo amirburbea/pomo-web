@@ -6,7 +6,6 @@
         self.domUtilityService = services.DomUtilityService;
         self.grid = grid;
         self.scope = scope;
-        var recalcHeightForData = function () { setTimeout(innerRecalcForData, 1); };
         var innerRecalcForData = function () {
             var gridId = self.grid.gridId;
             var footerPanelSel = '.' + gridId + ' .ngFooterPanel';
@@ -36,11 +35,13 @@
             var hash = '',
                 idx;
             for (idx in self.scope.renderedRows) {
-                hash += self.scope.renderedRows[idx].$$hashKey;
+                if (self.scope.renderedRows.hasOwnProperty(idx)) {
+                    hash += self.scope.renderedRows[idx].$$hashKey;
+                }
             }
             return hash;
         };
         self.scope.$watch('catHashKeys()', innerRecalcForData);
-        self.scope.$watch(self.grid.config.data, recalcHeightForData);
+        self.scope.$watch(self.grid.config.data, function() { setTimeout(innerRecalcForData, 1); });
     };
 }
