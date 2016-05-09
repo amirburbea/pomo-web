@@ -152,6 +152,7 @@
     <Compile Include="Web\SignalR\IDataClient.cs" />
     <Compile Include="Web\SignalR\OwinStartup.cs" />
     <Compile Include="Web\SignalR\WindsorInstaller.cs" />
+    <Compile Include="Web\StaticFiles\Html5Middleware.cs" />
     <Compile Include="Web\StaticFiles\IStaticFileSettings.cs" />
     <Compile Include="Web\StaticFiles\OwinStartup.cs" />
     <Compile Include="Web\StaticFiles\WindsorInstaller.cs" />
